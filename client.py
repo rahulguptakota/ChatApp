@@ -4,7 +4,7 @@ import socket, pickle
 import getpass
 
 s = socket.socket()
-host = socket.gethostname()
+host = ''
 port = 9000
 
 s.connect((host, port))
