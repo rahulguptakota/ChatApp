@@ -4,7 +4,7 @@ import socket, pickle, time
 
 s = socket.socket()
 host = '127.0.0.1'
-port = 9000
+port = 8000
 cnt = 0
 
 var = Tk()
@@ -32,6 +32,11 @@ def Printname(event):
 		s.close()
 	global var
 	# var.withdraw()
+	s.send(pickle.dumps([["shubham"],"Hey This is shubham bitch!"]))
+	while(True):
+		data = s.recv(1024)
+		print("Hell0" + data.decode())
+	s.close()
 
 	choices = ['ameya' , 'shubham' , 'rahul']
 
