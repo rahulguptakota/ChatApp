@@ -20,12 +20,12 @@ def main():
 		print(username,password,credentials)
 		if [username,password] in credentials:
 			print("Authentication sucessfull")
+			c.send("Hello " + username)
 			c.close()
-			# c.send("Hello " + username)
-	# 	else:
-	# 		c.send("Authentication Failure!!!")
-	# 		c.close()
-	# 		continue
+		else:
+			c.send(("Authentication Failure!!!").encode())
+			c.close()
+			continue
 	# 	filename = c.recv(1024)
 	# 	if os.path.isfile(filename):
 	# 		file_size = str(os.stat(filename).st_size)

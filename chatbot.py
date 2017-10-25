@@ -11,7 +11,11 @@ def Printname(event):
     password = entry2.get()
     print(username,password)
     s.send(pickle.dumps([username,password]))
-    s.close()
+    data = s.recv(1024)
+    print(data)
+    if ("Authentication Failure!!!").encode() in data:
+	    s.close() 
+	    exit()
 
 
 # print(s.recv(1024))
