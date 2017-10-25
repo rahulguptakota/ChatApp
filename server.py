@@ -2,6 +2,7 @@
 import socket, pickle
 import os.path
 
+logged_in_users = set()
 
 def main():
 	s = socket.socket()
@@ -20,6 +21,9 @@ def main():
 		print(username,password,credentials)
 		if [username,password] in credentials:
 			print("Authentication sucessfull")
+			logged_in_users.add(username)
+			if username in logged_in_users:
+				print("true")
 			c.send(("Hello " + username).encode())
 			c.close()
 		else:
