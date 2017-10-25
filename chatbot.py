@@ -1,9 +1,11 @@
 from tkinter import *
-import socket, pickle
+from tkinter import messagebox
+import socket, pickle, time
 
 s = socket.socket()
 host = '127.0.0.1'
 port = 9000
+cnt = 0
 
 def Printname(event):
 	username = entry1.get()
@@ -15,7 +17,14 @@ def Printname(event):
 	data = s.recv(1024)
 	print(data)
 	if ("Authentication Failure!!!").encode() in data:
-		s.close() 
+		global cnt
+		cnt = cnt + 1
+		if(cnt%3 == 0):
+			button_1.config(state = DISABLED)
+			messagebox.showinfo("","You have been locked for 10s")
+			time.sleep(10)
+			button_1.config(state = NORMAL)
+		s.close()
 	s.close()
 
 # from tkinter import messagebox;
