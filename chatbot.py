@@ -16,6 +16,8 @@ def Printname(event):
     if ("Authentication Failure!!!").encode() in data:
 	    s.close() 
 	    exit()
+# from tkinter import messagebox;
+# var = Tk()
 
 
 # print(s.recv(1024))
@@ -33,6 +35,13 @@ c = Checkbutton(var, text = "keep me logged in")
 c.grid(row=2, columnspan=2)
 top_frame = Frame(var)
 top_frame.grid(row=3, columnspan=2)
+# bottom_frame = Frame(var)
+# bottom_frame.pack(side = BOTTOM)
+# def Printname(event):
+# 	print(entry1.get()) 
+# 	# tkSimpleDialog.askstring(entry1.get())
+# 	# answer = simpledialog.askstring(entry1.get())
+# 	messagebox.showinfo("Say Hello", "Hello World")
 button_1 = Button(top_frame, text = "Login", fg = "yellow", bg = "black")
 button_1.bind("<Button-1>", Printname)
 button_2 = Button(top_frame, text = "Reset")
