@@ -1,0 +1,37 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ack	../client.py	/^ack = s.recv(1024)$/;"	kind:variable	line:21
+client.py	../client.py	1;"	kind:file	line:1
+credentials	../server.py	/^	credentials = [x.strip().split(':') for x in f.readlines()]$/;"	kind:variable	line:13
+data	../client.py	/^data = s.recv(1024)$/;"	kind:variable	line:14
+data	../server.py	/^	data = c.recv(1024)$/;"	kind:variable	line:17
+f	../client.py	/^f = open("filename","wb")$/;"	kind:variable	line:27
+f	../server.py	/^		f = open(filename,"rb")$/;"	kind:variable	line:29
+file_size	../client.py	/^	file_size = file_size - len(line)$/;"	kind:variable	line:32
+file_size	../client.py	/^file_size = int(ack)$/;"	kind:variable	line:26
+file_size	../server.py	/^        	file_size = str(os.stat(filename).st_size)$/;"	kind:variable	line:27
+filename	../client.py	/^filename = raw_input("Please enter the name of file you want to retrive: ")$/;"	kind:variable	line:19
+filename	../server.py	/^   	filename = c.recv(1024)$/;"	kind:variable	line:25
+getpass	../client.py	/^import getpass$/;"	kind:namespace	line:4
+host	../client.py	/^host = socket.gethostname()$/;"	kind:variable	line:7
+host	../server.py	/^host = socket.gethostname()$/;"	kind:variable	line:6
+line	../client.py	/^	line = s.recv(1024)$/;"	kind:variable	line:30
+line	../server.py	/^			line = f.read(1024)$/;"	kind:variable	line:34
+line	../server.py	/^		line = f.read(1024)$/;"	kind:variable	line:30
+os	../server.py	/^import os.path$/;"	kind:namespace	line:3
+password	../client.py	/^password = getpass.getpass("Please enter your password: ")$/;"	kind:variable	line:12
+path	../server.py	/^import os.path$/;"	kind:namespace	line:3
+pickle	../client.py	/^import socket, pickle$/;"	kind:namespace	line:3
+pickle	../server.py	/^import socket, pickle$/;"	kind:namespace	line:2
+port	../client.py	/^port = 9000$/;"	kind:variable	line:8
+port	../server.py	/^port = 9000$/;"	kind:variable	line:7
+s	../client.py	/^s = socket.socket()$/;"	kind:variable	line:6
+s	../server.py	/^s = socket.socket()$/;"	kind:variable	line:5
+server.py	../server.py	1;"	kind:file	line:1
+socket	../client.py	/^import socket, pickle$/;"	kind:namespace	line:3
+socket	../server.py	/^import socket, pickle$/;"	kind:namespace	line:2
+username	../client.py	/^username = raw_input("Please enter your username: ")$/;"	kind:variable	line:11
