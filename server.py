@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import socket, pickle, threading
 import os.path
+import time
 
-logged_in_users = set()
+logged_in_users = {}
 
 class ClientThread(threading.Thread):
 
@@ -36,10 +37,10 @@ while True:
 		print(username,password,credentials)
 		if [username,password] in credentials:
 			print("Authentication sucessfull")			
-			if username in logged_in_users:
-				logged_in_users.add(username)
+			if username in logged_in_users:				
 				print(username," already logged in.")
 				clientsock.close()
+			logged_in_users[username] = [clientsock, time.time()]
 		else:
 			print("Authentication unsuccessfull")
 			clientsock.send(("Authentication Failure!!!").encode())
