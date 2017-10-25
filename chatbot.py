@@ -4,18 +4,20 @@ import socket, pickle
 s = socket.socket()
 host = '127.0.0.1'
 port = 9000
-s.connect((host, port))
 
 def Printname(event):
-    username = entry1.get()
-    password = entry2.get()
-    print(username,password)
-    s.send(pickle.dumps([username,password]))
-    data = s.recv(1024)
-    print(data)
-    if ("Authentication Failure!!!").encode() in data:
-	    s.close() 
-	    exit()
+	username = entry1.get()
+	password = entry2.get()
+	print(username,password)
+	s = socket.socket()
+	s.connect((host, port))
+	s.send(pickle.dumps([username,password]))
+	data = s.recv(1024)
+	print(data)
+	if ("Authentication Failure!!!").encode() in data:
+		s.close() 
+	s.close()
+
 # from tkinter import messagebox;
 # var = Tk()
 

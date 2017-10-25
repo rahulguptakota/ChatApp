@@ -20,7 +20,7 @@ def main():
 		print(username,password,credentials)
 		if [username,password] in credentials:
 			print("Authentication sucessfull")
-			c.send("Hello " + username)
+			c.send(("Hello " + username).encode())
 			c.close()
 		else:
 			c.send(("Authentication Failure!!!").encode())
