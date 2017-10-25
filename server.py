@@ -1,45 +1,39 @@
 #!/usr/bin/python
-import socket, pickle
+import socket, pickle, threading
 import os.path
 
+class ClientThread(threading.Thread):
 
-def main():
-	s = socket.socket()
-	host = '127.0.0.1'
-	port = 9000
-	s.bind((host, port))
+	def __init__(self,ip,port,clientsocket):
+		threading.Thread.__init__(self)
+		self.ip = ip
+		self.port = port
+		self.csocket = clientsocket
+		print("[+] New thread started for "+ip+":"+str(port))
 
-	s.listen(5)
-	with open('users.txt') as f:
-		credentials = [x.strip().split(':') for x in f.readlines()]
-
-	while True:
-		c, addr = s.accept()
-		data = c.recv(1024)
+	def run(self):    
+		print("Connection from : "+ip+":"+str(port))
+		with open('users.txt') as f:
+			credentials = [x.strip().split(':') for x in f.readlines()]
+		data = self.csocket.recv(1024)
 		[username,password] = pickle.loads(data)
 		print(username,password,credentials)
 		if [username,password] in credentials:
 			print("Authentication sucessfull")
-			c.send(("Hello " + username).encode())
-			c.close()
+			self.csocket.send(("Hello " + username).encode())
 		else:
-			c.send(("Authentication Failure!!!").encode())
-			c.close()
-			continue
-	# 	filename = c.recv(1024)
-	# 	if os.path.isfile(filename):
-	# 		file_size = str(os.stat(filename).st_size)
-	# 		c.send(file_size)
-	# 		f = open(filename,"rb")
-	# 		line = f.read(1024)
-	# 		while(line):
-	# 			print("sending...")
-	# 			c.send(line)
-	# 			line = f.read(1024)
-	# 		f.close()
-	# 	else:
-	# 		c.send("File Not Found.")
-	# 	c.close
+			print("Authentication unsuccessfull")
+			self.csocket.send(("Authentication Failure!!!").encode())
+		self.csocket.close()
 
-if __name__ == '__main__':
-    main()
+s = socket.socket()
+host = '127.0.0.1'
+port = 9000
+s.bind((host, port))
+s.listen(5)
+
+while True:
+	print("nListening for incoming connections...")
+	(clientsock, (ip, port)) = s.accept()
+	newthread = ClientThread(ip, port, clientsock)
+	newthread.start()
