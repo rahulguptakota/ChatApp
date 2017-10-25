@@ -20,20 +20,20 @@ while True:
 		c.send("Hello " + username)
 	else:
 		c.send("Authentication Failure!!!")
-   		c.close()
+		c.close()
 		continue
-   	filename = c.recv(1024)
-   	if os.path.isfile(filename):
-        	file_size = str(os.stat(filename).st_size)
-        	c.send(file_size)
+	filename = c.recv(1024)
+	if os.path.isfile(filename):
+		file_size = str(os.stat(filename).st_size)
+		c.send(file_size)
 		f = open(filename,"rb")
 		line = f.read(1024)
 		while(line):
-			print "sending..."
+			print("sending...")
 			c.send(line)
 			line = f.read(1024)
 		f.close()
-   	else:
+	else:
 		c.send("File Not Found.")
-   	c.close
+	c.close
 
