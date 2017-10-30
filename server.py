@@ -8,6 +8,7 @@ import os
 from Crypto.PublicKey import RSA
 
 logged_in_users = {}
+logged_in_users_pub = {}
 message_queues = {}
 with open('users.txt') as f:
 	credentials = [x.strip().split(':') for x in f.readlines()]
@@ -37,11 +38,11 @@ class ClientThread(threading.Thread):
 		print("Connection from : "+ip+":"+str(port))
 		self.clientsocket.send(publickey.exportKey())	
 		data = self.clientsocket.recv(1024)
-		[username,password] = pickle.loads(data)
+		[username,password,clientpublickey] = pickle.loads(data)
 		username = privatekey.decrypt(username).decode()
 		password =privatekey.decrypt(password).decode()
 		message_queues[username] = Queue()
-		print(username,password,credentials)
+		print(username,password,clientpublickey,credentials)
 		if [username,password] in credentials:
 			print("Authentication sucessfull")			
 			if username in logged_in_users:				
@@ -50,28 +51,33 @@ class ClientThread(threading.Thread):
 				exit()
 			else:
 				self.username = username
-				logged_in_users[self.username] = [self.clientsocket, time.time(),self.clientsocket,[]]
+				logged_in_users[self.username] = [self.clientsocket, time.time(),[]]
+				logged_in_users_pub[self.username] = clientpublickey
 		else:
 			print("Authentication unsuccessfull")
 			self.clientsocket.send(("Authentication Failure!!!").encode())
 			self.clientsocket.close()
 			exit()
 
-		self.clientsocket.send(("Hello user").encode())
+		self.clientsocket.send(pickle.dumps(logged_in_users_pub))
 		self.clientsocket.setblocking(0)
 		while(True):
 			readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.1)
+			print([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket])
+			print(readable,writable,exceptional)
 			print("logged in user list for {} is {}".format(self.username,logged_in_users[self.username][-1]))
 			for r in readable:
 				print("something")
 				try:
-					data = pickle.loads(r.recv(1024))
+					data = r.recv(1024)
+					print(data)
 					if data:
+						data = pickle.load(data)
 						for user in data[0]:
 							print("Send {} to {} from {}".format(data[1],user,self.username))
 							message_queues[user].put(data[1])
-							if logged_in_users[user][-2] not in logged_in_users[user][-1]:
-								logged_in_users[user][-1].append(logged_in_users[user][-2])
+							if logged_in_users[user][0] not in logged_in_users[user][-1]:
+								logged_in_users[user][-1].append(logged_in_users[user][0])
 					else:
 						print("No data is send by the user")
 				except:
