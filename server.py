@@ -83,12 +83,12 @@ class ClientThread(threading.Thread):
 						data =  pickle.loads(data)
 						print(data)
 						# global privatekey
-						print(privatekey.decrypt(data[1]))
-						for user in data[0]:
-							print("Send {} to {} from {}".format(data[1],user,self.username))
+						# print(privatekey.decrypt(data[1]))
+						for user in data.keys():
+							print("Sending {} to {} from {}".format(data[user],user,self.username))
 							message = []
 							message.append(self.username)
-							message.append(data[1])
+							message.append(data[users])
 							message_queues[user].put(message)
 							if logged_in_users[user][0] not in logged_in_users[user][-1]:
 								logged_in_users[user][-1].append(logged_in_users[user][0])

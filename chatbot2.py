@@ -110,9 +110,27 @@ class OnlinePeople:
         self.chat.pack()
         self.whoelse = tk.Button(self.frame, text = 'Whoelse', width = 25, command = self.liveusers)
         self.whoelse.pack()
+        self.broadcast = tk.Button(self.frame, text = 'Broadcast', width = 25, command = self.messageall)
+        self.broadcast.pack()
         self.frame.pack()
         global flag 
         flag = 1
+
+    def messageall(self):
+        global s
+        otherusers = list(self.data.keys())
+        user="Broadcast"
+        if(user in self.newWindow):
+            # self.app = Chatbox(self.newWindow[num])
+            print(self.newWindow[user].winfo_exists())
+            if(not self.newWindow[user].winfo_exists()):
+                self.newWindow[user] = tk.Toplevel(self.master)
+                objectdict[user] = Chatbox(self.newWindow[user], otherusers)
+            # print ("Hallelujah")
+        else:
+            self.newWindow[user] = tk.Toplevel(self.master)
+            objectdict[user] = Chatbox(self.newWindow[user], otherusers)
+        # print(self.Lb1.curselection())
 
     def liveusers(self):
         global s
@@ -148,11 +166,11 @@ class OnlinePeople:
             print(self.newWindow[user].winfo_exists())
             if(not self.newWindow[user].winfo_exists()):
                 self.newWindow[user] = tk.Toplevel(self.master)
-                self.app = Chatbox(self.newWindow[user])
+                objectdict[user] = Chatbox(self.newWindow[user], [user])
             # print ("Hallelujah")
         else:
             self.newWindow[user] = tk.Toplevel(self.master)
-            objectdict[user] = Chatbox(self.newWindow[user], user, self.data[user])
+            objectdict[user] = Chatbox(self.newWindow[user], [user])
         # print(self.Lb1.curselection())
         # self.frame.destroy()
         # self.app = Chatbox(self.newWindow)
@@ -164,15 +182,12 @@ class OnlinePeople:
         
 
 class Chatbox:
-    def __init__(self, master, otheruser, publickey):
+    def __init__(self, master, otheruser):
         self.master = master
         self.otheruser = otheruser
-        self.publickey = RSA.importKey(publickey.decode())
         # self.parent = parent
         self.frame = tk.Frame(self.master)
-        self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")
-        self.chatLog.insert(tk.END, "Connecting to your partner..\n")
-        self.chatLog.insert(tk.END, "Some more data\n")             
+        self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")          
         #Bind a scrollbar to the Chat window
         scrollbar = tk.Scrollbar(self.frame, command=self.chatLog.yview, cursor="heart")
         self.chatLog['yscrollcommand'] = scrollbar.set
@@ -190,19 +205,23 @@ class Chatbox:
         self.frame.pack()
 
     def send_chat(self):
-        data = []
-        data.append([])
-        print(self.otheruser)
-        data[0].append(self.otheruser)
-        data.append(self.publickey.encrypt(self.entry1.get().encode('utf-8'), 16))
+        data = {}
+        global publickeys
+        senddata = self.entry1.get()
+        for users in self.otheruser:
+            data[users] = RSA.importKey(publickeys[users]).encrypt(senddata.encode('utf-8'), 16)
+        self.chatLog.insert(tk.END, "You: " + senddata+"\n")
         data = pickle.dumps(data)
         s.send(data)
     
-    def append_chat(self, data):
+
+    def append_chat(self, data, user):
         print("hello in append_chat ", data)
-        self.chatLog.insert(tk.END, data.decode())
+        self.chatLog.insert(tk.END, user + ": " + data.decode()+"\n")
 
     def quit_chat(self):
+        for users in self.otheruser:
+            del objectdict[users]
         self.master.destroy()
 
 
@@ -244,12 +263,12 @@ def main():
                 else:
                     decrypted_data = selfprivatekey.decrypt(data[1])
                     try:                        
-                        objectdict[data[0]].append_chat(decrypted_data)
+                        objectdict[data[0]].append_chat(decrypted_data, data[0])
                     except KeyError:
                         objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
                         print(data[0])
-                        objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], data[0], publickeys[data[0]])
-                        objectdict[data[0]].append_chat(decrypted_data)
+                        objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], [data[0]])
+                        objectdict[data[0]].append_chat(decrypted_data, data[0])
         elif(close):
             exit()
     # root = tk.Tk()
