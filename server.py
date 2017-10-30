@@ -67,7 +67,7 @@ class ClientThread(threading.Thread):
 		self.clientsocket.send(pickle.dumps(data))
 		# self.clientsocket.setblocking(0)
 		while(True):
-			readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.1)
+			readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.5)
 			# print([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket])
 			# print(readable,writable,exceptional)
 			# print("logged in user list for {} is {}".format(self.username,logged_in_users[self.username][-1]))
@@ -112,7 +112,8 @@ class ClientThread(threading.Thread):
 				temp = 1
 				while temp:
 					try:
-						print(self.username);
+						print(self.username)
+						# print(message_queues[self.username].get())
 						next_msg = message_queues[self.username].get_nowait()
 						print(next_msg)
 						s.send(pickle.dumps(next_msg))
