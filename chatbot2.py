@@ -10,6 +10,7 @@ port = 6000
 s.connect((host, port))
 cnt = 0
 flag = 0
+publickeys = {}
 
 objectdict = {}
 
@@ -92,6 +93,8 @@ class OnlinePeople:
         self.master = master
         self.newWindow = {}
         self.data = data
+        global publickeys
+        publickeys = data
         # self.parent = parent
         self.frame = tk.Frame(self.master)
         self.Lb1 = tk.Listbox(self.frame)
@@ -126,12 +129,16 @@ class OnlinePeople:
         self.Lb1.delete(0,tk.END)
         i=0
         print("in update_list ", data)
+        self.data = data
+        global publickeys
+        publickeys = data
         for key in data:
             self.Lb1.insert(i, key)
             i = i + 1
 
     def start_chat(self):
         users = list(self.data.keys())
+        # print(self.Lb1.curselection()[0])
         user = users[self.Lb1.curselection()[0]]
 
         if(user in self.newWindow):
@@ -221,7 +228,11 @@ def main():
                 if data[0] == "Live users list":
                     objectdict["whoelse"].update_list(data[1])
                 else:
-                    objectdict[data[0]].append_chat(data[1])
+                    try:
+                        objectdict[data[0]].append_chat(data[1])
+                    except KeyError:
+                        objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
+                        objectdict = Chatbox(objectdict["whoelse"].newWindow[data[0]], data[0], publickeys[data[0]])
     # root = tk.Tk()
     # app = Login(root)
     # root.mainloop()
