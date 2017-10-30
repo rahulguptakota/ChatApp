@@ -63,15 +63,12 @@ class ClientThread(threading.Thread):
 		# self.clientsocket.setblocking(0)
 		while(True):
 			readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.1)
-			print([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket])
-			print(readable,writable,exceptional)
-			print("logged in user list for {} is {}".format(self.username,logged_in_users[self.username][-1]))
+			# print([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket])
+			# print(readable,writable,exceptional)
+			# print("logged in user list for {} is {}".format(self.username,logged_in_users[self.username][-1]))
 			for r in readable:
-				print("something")
 				try:
-					data = r.recv(1024)
-					print(data)		
-					data = pickle.load(data)									
+					data = pickle.load(r.recv(1024))									
 					for user in data[0]:
 						print("Send {} to {} from {}".format(data[1],user,self.username))
 						message_queues[user].put(data[1])
@@ -98,8 +95,8 @@ class ClientThread(threading.Thread):
 						temp = 0
 
 s = socket.socket()
-host = '127.0.0.1'
-port = 8000
+host = '0.0.0.0'
+port = 6000
 s.bind((host, port))
 s.listen(5)
 # Sockets from which we expect to read
@@ -110,8 +107,8 @@ outputs = [ ]
 
 while True:
 	print("nListening for incoming connections...")
-	print(publickey.exportKey())
-	print(privatekey.exportKey())
+	# print(publickey.exportKey())
+	# print(privatekey.exportKey())
 	(clientsock, (ip, port)) = s.accept()
 	inputs.append(clientsock)
 	outputs.append(clientsock)
