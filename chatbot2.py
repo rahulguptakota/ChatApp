@@ -99,54 +99,71 @@ class OnlinePeople:
         self.Lb1.pack()
         self.chat = tk.Button(self.frame, text = 'Chat', width = 25, command = self.start_chat)
         self.chat.pack()
+        self.whoelse = tk.Button(self.frame, text = 'Whoelse', width = 25, command = self.liveusers)
+        self.whoelse.pack()
         self.frame.pack()
 
+    def liveusers(self):
+        global s
+        s.send("liveuserslist".encode())
+        
+
     def start_chat(self):
+        users = list(self.data.keys())
+        user = users[self.Lb1.curselection()[0]]
 
-        num = self.Lb1.curselection()
-
-        if(num in self.newWindow):
+        if(user in self.newWindow):
             # self.app = Chatbox(self.newWindow[num])
-            print(self.newWindow[num].winfo_exists())
-            if(not self.newWindow[num].winfo_exists()):
-                self.newWindow[num] = tk.Toplevel(self.master)
-                self.app = Chatbox(self.newWindow[num])
+            print(self.newWindow[user].winfo_exists())
+            if(not self.newWindow[user].winfo_exists()):
+                self.newWindow[user] = tk.Toplevel(self.master)
+                self.app = Chatbox(self.newWindow[user])
             # print ("Hallelujah")
         else:
-            self.newWindow[num] = tk.Toplevel(self.master)
-            self.app = Chatbox(self.newWindow[num])
+            self.newWindow[user] = tk.Toplevel(self.master)
+            self.app = Chatbox(self.newWindow[user], user, self.data[user])
         # print(self.Lb1.curselection())
         # self.frame.destroy()
         # self.app = Chatbox(self.newWindow)
 
         print (self.newWindow)
         
-        print (num)
+        print (user)
+        # self.frame.destroy()                
+        
 
 class Chatbox:
-    def __init__(self, master):
+    def __init__(self, master, otheruser, publickey):
         self.master = master
+        self.otheruser = otheruser
+        self.publickey = publickey
         # self.parent = parent
         self.frame = tk.Frame(self.master)
-        ChatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")
-        ChatLog.insert(tk.END, "Connecting to your partner..\n")
-        ChatLog.config(state=tk.DISABLED)
-
+        self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")
+        self.chatLog.insert(tk.END, "Connecting to your partner..\n")
+        self.chatLog.config(state=tk.DISABLED)        
         #Bind a scrollbar to the Chat window
-        scrollbar = tk.Scrollbar(self.frame, command=ChatLog.yview, cursor="heart")
-        ChatLog['yscrollcommand'] = scrollbar.set
-        ChatLog.grid(row=0, columnspan = 2)
+        scrollbar = tk.Scrollbar(self.frame, command=self.chatLog.yview, cursor="heart")
+        self.chatLog['yscrollcommand'] = scrollbar.set
+        self.chatLog.grid(row=0, columnspan = 2)
+        self.entry1 = tk.Entry(self.frame)
+        self.entry1.grid(row=1, columnspan = 2, sticky="news")
+
         #Create the Button to send message
         SendButton = tk.Button(self.frame, text="Send",
                             bd=0, bg="#FFBF00", activebackground="#FACC2E",
-                            command=self.start_chat)        
-        SendButton.grid(row=1, column=0, sticky="news")
+                            command=self.send_chat)        
+        SendButton.grid(row=2, column=0, sticky="news")
         self.quit = tk.Button(self.frame, text = 'Quit', command = self.quit_chat)
-        self.quit.grid(row=1, column=1, sticky="news")
+        self.quit.grid(row=2, column=1, sticky="news")
         self.frame.pack()
 
-    def start_chat(self):
-        pass
+    def send_chat(self):
+        data = []
+        data.append([])
+        data[0].append(self.otheruser)
+        data.append(self.entry1.get())
+        s.send(pickle.dump(self.publickey.encrypt(data.encode('utf-8'),16)))
     
     def quit_chat(self):
         self.master.destroy()
