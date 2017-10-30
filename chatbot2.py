@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import socket, pickle, time
 from Crypto.PublicKey import RSA
+import sys
 
 s = socket.socket()
 host = '192.168.0.106'
@@ -174,12 +175,37 @@ class Chatbox:
     
     def quit_chat(self):
         self.master.destroy()
-        
+
+class myThread(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.start()
+
+    def callback(self):
+        self.root.quit()
+
+    def run(self):
+        self.root = tk.Tk()
+        Login(self.root)
+
+        self.root.mainloop()
+
 
 def main(): 
-    root = tk.Tk()
-    app = Login(root)
-    root.mainloop()
+    tkThread = myThread()
+    global s
+    while(True):
+	    readable, writable, exceptional = select.select([s],[],[])
+        for r in readable:
+            data = pickle.load(r.recv(1024))
+
+    # root = tk.Tk()
+    # app = Login(root)
+    # root.mainloop()
+
+
+
 
 if __name__ == '__main__':
     main()
