@@ -17,30 +17,27 @@ def Printname(event):
 	username = entry1.get()
 	password = entry2.get()
 	print(username,password)
-	s = socket.socket()
-	s.connect((host, port))
-	publickey=s.recv(1024)
-	print(publickey)
-	s.send(pickle.dumps([username,password]))
-	data = s.recv(1024)
-	print(data)
-	if ("Authentication Failure!!!").encode() in data:
-		global cnt
-		cnt = cnt + 1
-		if(cnt%3 == 0):
-			button_1.config(state = DISABLED)
-			messagebox.showinfo("","You have been locked for 10s")
-			time.sleep(10)
-			button_1.config(state = NORMAL)
-		s.close()
-		exit()
+	# s = socket.socket()
+	# s.connect((host, port))
+	# s.send(pickle.dumps([username,password]))
+	# data = s.recv(1024)
+	# print(data)
+	# if ("Authentication Failure!!!").encode() in data:
+	# 	global cnt
+	# 	cnt = cnt + 1
+	# 	if(cnt%3 == 0):
+	# 		button_1.config(state = DISABLED)
+	# 		messagebox.showinfo("","You have been locked for 10s")
+	# 		time.sleep(10)
+	# 		button_1.config(state = NORMAL)
+	# 	s.close()
 	global var
-	# var.withdraw()
-	s.send(pickle.dumps([["shubham"],"Hey This is shubham bitch!"]))
-	while(True):
-		data = s.recv(1024)
-		print("Hell0" + data.decode())
-	s.close()
+	var.withdraw()
+	# s.send(pickle.dumps([["shubham"],"Hey This is shubham bitch!"]))
+	# while(True):
+	# 	data = s.recv(1024)
+	# 	print("Hell0" + data.decode())
+	# s.close()
 
 	choices = ['ameya' , 'shubham' , 'rahul']
 

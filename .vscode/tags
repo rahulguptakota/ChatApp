@@ -4,34 +4,60 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+ClientThread	../server.py	/^class ClientThread(threading.Thread):$/;"	kind:class	line:11
+Printname	../chatbot.py	/^def Printname(event):$/;"	kind:function	line:15
+Queue	../server.py	/^from queue import Queue$/;"	kind:namespace	line:6
+__init__	../server.py	/^	def __init__(self,ip,port,username,clientsocket):$/;"	kind:member	line:13
 ack	../client.py	/^ack = s.recv(1024)$/;"	kind:variable	line:21
+button_1	../chatbot.py	/^button_1 = Button(top_frame, text = "Login", fg = "yellow", bg = "black")$/;"	kind:variable	line:71
+button_2	../chatbot.py	/^button_2 = Button(top_frame, text = "Reset")$/;"	kind:variable	line:73
+c	../chatbot.py	/^c = Checkbutton(var, text = "keep me logged in")$/;"	kind:variable	line:67
+chatbot.py	../chatbot.py	1;"	kind:file	line:1
 client.py	../client.py	1;"	kind:file	line:1
-credentials	../server.py	/^	credentials = [x.strip().split(':') for x in f.readlines()]$/;"	kind:variable	line:13
+cnt	../chatbot.py	/^cnt = 0$/;"	kind:variable	line:8
 data	../client.py	/^data = s.recv(1024)$/;"	kind:variable	line:14
-data	../server.py	/^	data = c.recv(1024)$/;"	kind:variable	line:17
+data	../server.py	/^	data = clientsock.recv(1024)$/;"	kind:variable	line:81
+entry1	../chatbot.py	/^entry1 = Entry(var)$/;"	kind:variable	line:61
+entry2	../chatbot.py	/^entry2 = Entry(var, show="*")$/;"	kind:variable	line:62
 f	../client.py	/^f = open("filename","wb")$/;"	kind:variable	line:27
-f	../server.py	/^		f = open(filename,"rb")$/;"	kind:variable	line:29
 file_size	../client.py	/^	file_size = file_size - len(line)$/;"	kind:variable	line:32
 file_size	../client.py	/^file_size = int(ack)$/;"	kind:variable	line:26
-file_size	../server.py	/^        	file_size = str(os.stat(filename).st_size)$/;"	kind:variable	line:27
 filename	../client.py	/^filename = raw_input("Please enter the name of file you want to retrive: ")$/;"	kind:variable	line:19
-filename	../server.py	/^   	filename = c.recv(1024)$/;"	kind:variable	line:25
 getpass	../client.py	/^import getpass$/;"	kind:namespace	line:4
-host	../client.py	/^host = socket.gethostname()$/;"	kind:variable	line:7
-host	../server.py	/^host = socket.gethostname()$/;"	kind:variable	line:6
+host	../chatbot.py	/^host = '127.0.0.1'$/;"	kind:variable	line:6
+host	../client.py	/^host = ''$/;"	kind:variable	line:7
+host	../server.py	/^host = '127.0.0.1'$/;"	kind:variable	line:63
+inputs	../server.py	/^inputs = [ ]$/;"	kind:variable	line:68
 line	../client.py	/^	line = s.recv(1024)$/;"	kind:variable	line:30
-line	../server.py	/^			line = f.read(1024)$/;"	kind:variable	line:34
-line	../server.py	/^		line = f.read(1024)$/;"	kind:variable	line:30
+logged_in_users	../server.py	/^logged_in_users = {}$/;"	kind:variable	line:8
+message_queues	../server.py	/^message_queues = {}$/;"	kind:variable	line:9
+messagebox	../chatbot.py	/^from tkinter import messagebox$/;"	kind:namespace	line:2
+name	../chatbot.py	/^name = Label(var, text = "name")$/;"	kind:variable	line:59
+newthread	../server.py	/^	newthread = ClientThread(ip, port, username,clientsock)$/;"	kind:variable	line:95
 os	../server.py	/^import os.path$/;"	kind:namespace	line:3
+outputs	../server.py	/^outputs = [ ]$/;"	kind:variable	line:70
+password	../chatbot.py	/^password = Label(var, text = "password")$/;"	kind:variable	line:60
 password	../client.py	/^password = getpass.getpass("Please enter your password: ")$/;"	kind:variable	line:12
 path	../server.py	/^import os.path$/;"	kind:namespace	line:3
+pickle	../chatbot.py	/^import socket, pickle, time$/;"	kind:namespace	line:3
 pickle	../client.py	/^import socket, pickle$/;"	kind:namespace	line:3
-pickle	../server.py	/^import socket, pickle$/;"	kind:namespace	line:2
+pickle	../server.py	/^import socket, pickle, threading$/;"	kind:namespace	line:2
+port	../chatbot.py	/^port = 8000$/;"	kind:variable	line:7
 port	../client.py	/^port = 9000$/;"	kind:variable	line:8
-port	../server.py	/^port = 9000$/;"	kind:variable	line:7
+port	../server.py	/^port = 8000$/;"	kind:variable	line:64
+raise_frame	../chatbot.py	/^def raise_frame(frame):$/;"	kind:function	line:12
+run	../server.py	/^	def run(self):$/;"	kind:member	line:21
+s	../chatbot.py	/^s = socket.socket()$/;"	kind:variable	line:5
 s	../client.py	/^s = socket.socket()$/;"	kind:variable	line:6
-s	../server.py	/^s = socket.socket()$/;"	kind:variable	line:5
+s	../server.py	/^s = socket.socket()$/;"	kind:variable	line:62
+select	../server.py	/^import select$/;"	kind:namespace	line:5
 server.py	../server.py	1;"	kind:file	line:1
+socket	../chatbot.py	/^import socket, pickle, time$/;"	kind:namespace	line:3
 socket	../client.py	/^import socket, pickle$/;"	kind:namespace	line:3
-socket	../server.py	/^import socket, pickle$/;"	kind:namespace	line:2
-username	../client.py	/^username = raw_input("Please enter your username: ")$/;"	kind:variable	line:11
+socket	../server.py	/^import socket, pickle, threading$/;"	kind:namespace	line:2
+threading	../server.py	/^import socket, pickle, threading$/;"	kind:namespace	line:2
+time	../chatbot.py	/^import socket, pickle, time$/;"	kind:namespace	line:3
+time	../server.py	/^import time$/;"	kind:namespace	line:4
+top_frame	../chatbot.py	/^top_frame = Frame(var)$/;"	kind:variable	line:69
+username	../client.py	/^username = input("Please enter your username: ")$/;"	kind:variable	line:11
+var	../chatbot.py	/^var = Tk()$/;"	kind:variable	line:10
