@@ -1,21 +1,25 @@
 import tkinter as tk
 from tkinter import messagebox
-import socket, pickle, time
+import socket, pickle, time, threading, select
 from Crypto.PublicKey import RSA
 import sys
 
 s = socket.socket()
 host = '192.168.0.106'
 port = 6000
+s.connect((host, port))
 cnt = 0
+flag = 0
+
+objectdict = {}
 
 with open('publickeys.txt') as f:
-	selfpublickey = RSA.importKey(f.read())
-	f.close()
+    selfpublickey = RSA.importKey(f.read())
+    f.close()
 
 with open('privatekey.txt') as f:
-	selfprivatekey = RSA.importKey(f.read())
-	f.close()
+    selfprivatekey = RSA.importKey(f.read())
+    f.close()
 
 def raise_frame(frame):
     frame.tkraise()
@@ -53,8 +57,7 @@ class Login:
         username = self.entry1.get()
         password = self.entry2.get()
         print(username,password)
-        global s
-        s.connect((host, port))
+        global s        
         publickey = s.recv(1024)
         print(publickey)
         publickey = RSA.importKey(publickey.decode())
@@ -67,19 +70,19 @@ class Login:
         # data = "success".encode()
         print(data)
         if ("Authentication Failure!!!").encode() in data:
-        	global cnt
-        	cnt = cnt + 1
-        	if(cnt%3 == 0):
-        		self.button_1.config(state = tk.DISABLED)
-        		messagebox.showinfo("3 wrong attempts","You have been locked for 10s")
-        		time.sleep(10)
-        		self.button_1.config(state = tk.NORMAL)
-        	s.close()
+            global cnt
+            cnt = cnt + 1
+            if(cnt%3 == 0):
+                self.button_1.config(state = tk.DISABLED)
+                messagebox.showinfo("3 wrong attempts","You have been locked for 10s")
+                time.sleep(10)
+                self.button_1.config(state = tk.NORMAL)
+            s.close()
         else:
             data = pickle.loads(data)
             print(data)
-            self.frame.destroy()
-            self.app = OnlinePeople(self.master, data)
+            self.frame.destroy()                       
+            objectdict["whoelse"] = OnlinePeople(self.master, data[1])
 
         # self.frame.destroy()
         # self.app = OnlinePeople(self.master)
@@ -103,18 +106,29 @@ class OnlinePeople:
         self.whoelse = tk.Button(self.frame, text = 'Whoelse', width = 25, command = self.liveusers)
         self.whoelse.pack()
         self.frame.pack()
+        global flag 
+        flag = 1
 
     def liveusers(self):
         global s
         s.send("Live users list".encode())
-        self.data = pickle.loads(s.recv(1024))
+        # self.data = pickle.loads(s.recv(1024))
+        # cs=self.Lb1.curselection()
+        # self.Lb1.delete(0,tk.END)
+        # i=0
+        # for key in self.data:
+        #     self.Lb1.insert(i, key)
+        #     i = i + 1
+        # print(self.data) 
+
+    def update_list(self, data):
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
-        for key in self.data:
+        print("in update_list ", data)
+        for key in data:
             self.Lb1.insert(i, key)
             i = i + 1
-        print(self.data) 
 
     def start_chat(self):
         users = list(self.data.keys())
@@ -129,7 +143,7 @@ class OnlinePeople:
             # print ("Hallelujah")
         else:
             self.newWindow[user] = tk.Toplevel(self.master)
-            self.app = Chatbox(self.newWindow[user], user, self.data[user])
+            objectdict[user] = Chatbox(self.newWindow[user], user, self.data[user])
         # print(self.Lb1.curselection())
         # self.frame.destroy()
         # self.app = Chatbox(self.newWindow)
@@ -173,6 +187,9 @@ class Chatbox:
         data.append(self.entry1.get())
         s.send(pickle.dump(self.publickey.encrypt(data.encode('utf-8'),16)))
     
+    def append_chat(self, data):
+        self.chatLog.insert(tk.END, data)
+
     def quit_chat(self):
         self.master.destroy()
 
@@ -196,10 +213,15 @@ def main():
     tkThread = myThread()
     global s
     while(True):
-	    readable, writable, exceptional = select.select([s],[],[])
-        for r in readable:
-            data = pickle.load(r.recv(1024))
-
+        if(flag == 1):
+            readable, writable, exceptional = select.select([s],[],[])
+            for r in readable:
+                data = pickle.loads(r.recv(1024))
+                print("this is data\n", data)
+                if data[0] == "Live users list":
+                    objectdict["whoelse"].update_list(data[1])
+                else:
+                    objectdict[data[0]].append_chat(data[1])
     # root = tk.Tk()
     # app = Login(root)
     # root.mainloop()
