@@ -88,7 +88,7 @@ class ClientThread(threading.Thread):
 							print("Sending {} to {} from {}".format(data[user],user,self.username))
 							message = []
 							message.append(self.username)
-							message.append(data[users])
+							message.append(data[user])
 							message_queues[user].put(message)
 							if logged_in_users[user][0] not in logged_in_users[user][-1]:
 								logged_in_users[user][-1].append(logged_in_users[user][0])

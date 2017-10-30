@@ -166,7 +166,7 @@ class OnlinePeople:
             print(self.newWindow[user].winfo_exists())
             if(not self.newWindow[user].winfo_exists()):
                 self.newWindow[user] = tk.Toplevel(self.master)
-                objectdict[user] = Chatbox(self.newWindow[user], [user])
+                objectdict[user] = Chatbox(self.newWindow[user], [])
             # print ("Hallelujah")
         else:
             self.newWindow[user] = tk.Toplevel(self.master)
@@ -203,6 +203,7 @@ class Chatbox:
         self.quit = tk.Button(self.frame, text = 'Quit', command = self.quit_chat)
         self.quit.grid(row=2, column=1, sticky="news")
         self.frame.pack()
+        objectdict["whoelse"].liveusers()
 
     def send_chat(self):
         data = {}
