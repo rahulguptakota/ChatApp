@@ -97,6 +97,7 @@ class Login:
 class OnlinePeople:
     def __init__(self, master):
         self.master = master
+        self.newWindow = {}
         # self.parent = parent
         self.frame = tk.Frame(self.master)
         self.Lb1 = tk.Listbox(self.frame)
@@ -113,10 +114,26 @@ class OnlinePeople:
         self.frame.pack()
 
     def start_chat(self):
-        self.newWindow = tk.Toplevel(self.master)
-        print(self.Lb1.curselection())
+
+        num = self.Lb1.curselection()
+
+        if(num in self.newWindow):
+            # self.app = Chatbox(self.newWindow[num])
+            print(self.newWindow[num].winfo_exists())
+            if(not self.newWindow[num].winfo_exists()):
+                self.newWindow[num] = tk.Toplevel(self.master)
+                self.app = Chatbox(self.newWindow[num])
+            # print ("Hallelujah")
+        else:
+            self.newWindow[num] = tk.Toplevel(self.master)
+            self.app = Chatbox(self.newWindow[num])
+        # print(self.Lb1.curselection())
         # self.frame.destroy()
-        self.app = Chatbox(self.newWindow)
+        # self.app = Chatbox(self.newWindow)
+
+        print (self.newWindow)
+        
+        print (num)
 
 class Chatbox:
     def __init__(self, master):
