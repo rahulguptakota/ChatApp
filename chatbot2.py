@@ -5,7 +5,7 @@ from Crypto.PublicKey import RSA
 import sys
 
 s = socket.socket()
-host = '127.0.0.1'
+host = '192.168.0.104'
 port = 6000
 s.connect((host, port))
 cnt = 0
