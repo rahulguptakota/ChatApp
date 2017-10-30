@@ -60,7 +60,7 @@ class ClientThread(threading.Thread):
 			exit()
 
 		self.clientsocket.send(pickle.dumps(logged_in_users_pub))
-		self.clientsocket.setblocking(0)
+		# self.clientsocket.setblocking(0)
 		while(True):
 			readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.1)
 			print([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket])
@@ -70,16 +70,13 @@ class ClientThread(threading.Thread):
 				print("something")
 				try:
 					data = r.recv(1024)
-					print(data)
-					if data:
-						data = pickle.load(data)
-						for user in data[0]:
-							print("Send {} to {} from {}".format(data[1],user,self.username))
-							message_queues[user].put(data[1])
-							if logged_in_users[user][0] not in logged_in_users[user][-1]:
-								logged_in_users[user][-1].append(logged_in_users[user][0])
-					else:
-						print("No data is send by the user")
+					print(data)		
+					data = pickle.load(data)									
+					for user in data[0]:
+						print("Send {} to {} from {}".format(data[1],user,self.username))
+						message_queues[user].put(data[1])
+						if logged_in_users[user][0] not in logged_in_users[user][-1]:
+							logged_in_users[user][-1].append(logged_in_users[user][0])
 				except:
 					print("Clossing connection for {}".format(self.username))
 					self.clientsocket.close()
@@ -102,7 +99,7 @@ class ClientThread(threading.Thread):
 
 s = socket.socket()
 host = '127.0.0.1'
-port = 6000
+port = 8000
 s.bind((host, port))
 s.listen(5)
 # Sockets from which we expect to read

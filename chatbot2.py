@@ -4,7 +4,7 @@ import socket, pickle, time
 from Crypto.PublicKey import RSA
 
 s = socket.socket()
-host = '127.0.0.1'
+host = '192.168.0.106'
 port = 6000
 cnt = 0
 
@@ -39,7 +39,7 @@ class Login:
         top_frame = tk.Frame(self.frame)
         top_frame.grid(row=3, columnspan=2)
 
-        self.master.bind('<Return>', self.new_window2)
+        self.master.bind('<Return>', self.new_window)
         self.button_1 = tk.Button(top_frame, text = "Login", fg = "yellow", bg = "black", command = self.new_window)
         # button_1.bind("<Button-1>", Printname)
         self.button_2 = tk.Button(top_frame, text = "Reset")
@@ -47,40 +47,12 @@ class Login:
         self.button_2.pack(side = tk.LEFT)
         self.frame.pack()
 
-    def new_window2(self , event):
+    def new_window(self, event=None):
         # self.newWindow = tk.Toplevel(self.master)
         username = self.entry1.get()
         password = self.entry2.get()
         print(username,password)
-        # s = socket.socket()
-        # s.connect((host, port))
-        # s.send(pickle.dumps([username,password]))
-        # data = s.recv(1024)
-        # data = "Authentication Failure!!!".encode()
-        data = "success".encode()
-        print(data)
-        if ("Authentication Failure!!!").encode() in data:
-            global cnt
-            cnt = cnt + 1
-            if(cnt%3 == 0):
-                self.button_1.config(state = tk.DISABLED)
-                messagebox.showinfo("3 wrong attempts","You have been locked for 10s")
-                time.sleep(10)
-                self.button_1.config(state = tk.NORMAL)
-            s.close()
-        else:
-            self.frame.destroy()
-            self.app = OnlinePeople(self.master)
-
-        # self.frame.destroy()
-        # self.app = OnlinePeople(self.master)
-
-    def new_window(self):
-        # self.newWindow = tk.Toplevel(self.master)
-        username = self.entry1.get()
-        password = self.entry2.get()
-        print(username,password)
-        s = socket.socket()
+        global s
         s.connect((host, port))
         publickey = s.recv(1024)
         print(publickey)
@@ -106,23 +78,22 @@ class Login:
             data = pickle.loads(data)
             print(data)
             self.frame.destroy()
-            self.app = OnlinePeople(self.master)
+            self.app = OnlinePeople(self.master, data)
 
         # self.frame.destroy()
         # self.app = OnlinePeople(self.master)
 
 class OnlinePeople:
-    def __init__(self, master):
+    def __init__(self, master,data={}):
         self.master = master
+        self.data = data
         # self.parent = parent
         self.frame = tk.Frame(self.master)
         self.Lb1 = tk.Listbox(self.frame)
-        self.Lb1.insert(1, "Python")
-        self.Lb1.insert(2, "Perl")
-        self.Lb1.insert(3, "C")
-        self.Lb1.insert(4, "PHP")
-        self.Lb1.insert(5, "JSP")
-        self.Lb1.insert(6, "Ruby")
+        i=0
+        for key in self.data:
+            self.Lb1.insert(i, key)
+            i = i + 1
 
         self.Lb1.pack()
         self.chat = tk.Button(self.frame, text = 'Chat', width = 25, command = self.start_chat)
