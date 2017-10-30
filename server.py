@@ -58,8 +58,10 @@ class ClientThread(threading.Thread):
 			self.clientsocket.send(("Authentication Failure!!!").encode())
 			self.clientsocket.close()
 			exit()
-
-		self.clientsocket.send(pickle.dumps(logged_in_users_pub))
+		data = []
+		data.append("Live users list")
+		data.append(logged_in_users_pub)
+		self.clientsocket.send(pickle.dumps(data))
 		# self.clientsocket.setblocking(0)
 		while(True):
 			readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.1)
@@ -70,12 +72,18 @@ class ClientThread(threading.Thread):
 				try:
 					data = r.recv(1024)
 					if data.decode() == "Live users list":
-						self.clientsocket.send(pickle.dumps(logged_in_users_pub))
+						data = []
+						data.append("Live users list")
+						data.append(logged_in_users_pub)
+						self.clientsocket.send(pickle.dumps(data))
 					else:
 						data =  pickle.loads(data)								
 						for user in data[0]:
 							print("Send {} to {} from {}".format(data[1],user,self.username))
-							message_queues[user].put(data[1])
+							message = []
+							message.append(user)
+							message.append(data[1])
+							message_queues[user].put(message)
 							if logged_in_users[user][0] not in logged_in_users[user][-1]:
 								logged_in_users[user][-1].append(logged_in_users[user][0])
 				except:
@@ -90,7 +98,7 @@ class ClientThread(threading.Thread):
 					try:
 						print(self.username);
 						next_msg = message_queues[self.username].get_nowait()
-						s.send(next_msg.encode())
+						s.send(pickle.dumps(next_msg.encode()))
 					except:
 						print("time to remove ", self.username)
 						if s in logged_in_users[self.username][-1]:
