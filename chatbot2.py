@@ -10,6 +10,7 @@ port = 6000
 s.connect((host, port))
 cnt = 0
 flag = 0
+close = 0
 publickeys = {}
 
 objectdict = {}
@@ -171,7 +172,7 @@ class Chatbox:
         self.frame = tk.Frame(self.master)
         self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")
         self.chatLog.insert(tk.END, "Connecting to your partner..\n")
-        self.chatLog.config(state=tk.DISABLED)        
+        self.chatLog.insert(tk.END, "Some more data\n")             
         #Bind a scrollbar to the Chat window
         scrollbar = tk.Scrollbar(self.frame, command=self.chatLog.yview, cursor="heart")
         self.chatLog['yscrollcommand'] = scrollbar.set
@@ -197,10 +198,12 @@ class Chatbox:
         s.send(data)
     
     def append_chat(self, data):
-        self.chatLog.insert(tk.END, data)
+        print("hello in append_chat ", data)
+        self.chatLog.insert(tk.END, data.decode())
 
     def quit_chat(self):
         self.master.destroy()
+
 
 class myThread(threading.Thread):
 
@@ -211,10 +214,16 @@ class myThread(threading.Thread):
     def callback(self):
         self.root.quit()
 
-    def run(self):
-        self.root = tk.Tk()
-        Login(self.root)
+    def on_closing(self):
+        global close
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            close = 1
+            exit()
 
+    def run(self):
+        self.root = tk.Tk()        
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        Login(self.root)
         self.root.mainloop()
 
 
@@ -233,11 +242,13 @@ def main():
                 else:
                     decrypted_data = selfprivatekey.decrypt(data[1])
                     try:                        
-                        objectdict[data[0]].append_chat(data[1])
+                        objectdict[data[0]].append_chat(decrypted_data)
                     except KeyError:
                         objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
                         objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], data[0], publickeys[data[0]])
-                        objectdict[data[0]].append_chat(data[1])
+                        objectdict[data[0]].append_chat(decrypted_data)
+        elif(close):
+            exit()
     # root = tk.Tk()
     # app = Login(root)
     # root.mainloop()

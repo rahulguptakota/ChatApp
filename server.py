@@ -18,6 +18,7 @@ with open('publickeys.txt') as f:
 	publickey = RSA.importKey(f.read())
 	f.close()
 
+privatekey = ""
 with open('privatekey.txt') as f:
 	privatekey = RSA.importKey(f.read())
 	f.close()
@@ -42,7 +43,7 @@ class ClientThread(threading.Thread):
 		username = privatekey.decrypt(username).decode()
 		password =privatekey.decrypt(password).decode()
 		message_queues[username] = Queue()
-		print(username,password,clientpublickey,credentials)
+		# print(username,password,clientpublickey,credentials)
 		if [username,password] in credentials:
 			print("Authentication sucessfull")			
 			if username in logged_in_users:				
@@ -71,13 +72,18 @@ class ClientThread(threading.Thread):
 			for r in readable:
 				try:
 					data = r.recv(1024)
-					if data.decode() == "Live users list":
+					print(data)
+					print("Hey\n")
+					if data == "Live users list".encode():
 						data = []
 						data.append("Live users list")
 						data.append(logged_in_users_pub)
 						self.clientsocket.send(pickle.dumps(data))
 					else:
-						data =  pickle.loads(data)								
+						data =  pickle.loads(data)
+						print(data)
+						# global privatekey
+						print(privatekey.decrypt(data[1]))
 						for user in data[0]:
 							print("Send {} to {} from {}".format(data[1],user,self.username))
 							message = []
@@ -98,7 +104,8 @@ class ClientThread(threading.Thread):
 					try:
 						print(self.username);
 						next_msg = message_queues[self.username].get_nowait()
-						s.send(pickle.dumps(next_msg.encode()))
+						print(next_msg)
+						s.send(pickle.dumps(next_msg))
 					except:
 						print("time to remove ", self.username)
 						if s in logged_in_users[self.username][-1]:
