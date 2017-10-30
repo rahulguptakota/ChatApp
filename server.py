@@ -53,7 +53,7 @@ class ClientThread(threading.Thread):
 				exit()
 			else:
 				self.username = username
-				logged_in_users[self.username] = [self.clientsocket,[],1]
+				logged_in_users[self.username] = [self.clientsocket,[]]
 				logged_in_users_pub[self.username] = clientpublickey
 				recently_connected[self.username] = time.time()
 		else:
@@ -87,7 +87,7 @@ class ClientThread(threading.Thread):
 								del recently_connected[item]
 						data = []
 						data.append("Live 1Hr users list")
-						data.append(recently_connected.keys())
+						data.append(recently_connected)
 						self.clientsocket.send(pickle.dumps(data))
 					else:
 						data =  pickle.loads(data)
@@ -126,7 +126,7 @@ class ClientThread(threading.Thread):
 
 s = socket.socket()
 host = '0.0.0.0'
-port = 8000
+port = 6000
 s.bind((host, port))
 s.listen(5)
 # Sockets from which we expect to read

@@ -5,8 +5,8 @@ from Crypto.PublicKey import RSA
 import sys
 
 s = socket.socket()
-host = '192.168.0.106'
-port = 8000
+host = '127.0.0.1'
+port = 6000
 s.connect((host, port))
 cnt = 0
 flag = 0
@@ -268,7 +268,7 @@ def main():
                 if data[0] == "Live users list":
                     objectdict["whoelse"].update_list(data[1])
                 elif data[0] == "Live 1Hr users list":
-                    objectdict["whoelse"].update_list(data[1])
+                    objectdict["whoelse"].update_list(list(data[1].keys()))
                 else:
                     decrypted_data = selfprivatekey.decrypt(data[1])
                     try:                        
