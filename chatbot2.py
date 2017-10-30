@@ -14,6 +14,7 @@ class Login:
     def __init__(self, master):
         self.master = master
         self.frame = tk.Frame(self.master)
+
         name = tk.Label(self.frame, text = "name")
         password = tk.Label(self.frame, text = "password")
         name.grid(row=0, sticky = tk.E)
@@ -28,12 +29,42 @@ class Login:
         # self.button1.grid(row=3, sticky = tk.E)
         top_frame = tk.Frame(self.frame)
         top_frame.grid(row=3, columnspan=2)
+
+        self.master.bind('<Return>', self.new_window2)
         self.button_1 = tk.Button(top_frame, text = "Login", fg = "yellow", bg = "black", command = self.new_window)
         # button_1.bind("<Button-1>", Printname)
         self.button_2 = tk.Button(top_frame, text = "Reset")
         self.button_1.pack(side = tk.LEFT)
         self.button_2.pack(side = tk.LEFT)
         self.frame.pack()
+
+    def new_window2(self , event):
+        # self.newWindow = tk.Toplevel(self.master)
+        username = self.entry1.get()
+        password = self.entry2.get()
+        print(username,password)
+        # s = socket.socket()
+        # s.connect((host, port))
+        # s.send(pickle.dumps([username,password]))
+        # data = s.recv(1024)
+        # data = "Authentication Failure!!!".encode()
+        data = "success".encode()
+        print(data)
+        if ("Authentication Failure!!!").encode() in data:
+            global cnt
+            cnt = cnt + 1
+            if(cnt%3 == 0):
+                self.button_1.config(state = tk.DISABLED)
+                messagebox.showinfo("3 wrong attempts","You have been locked for 10s")
+                time.sleep(10)
+                self.button_1.config(state = tk.NORMAL)
+            s.close()
+        else:
+            self.frame.destroy()
+            self.app = OnlinePeople(self.master)
+
+        # self.frame.destroy()
+        # self.app = OnlinePeople(self.master)
 
     def new_window(self):
         # self.newWindow = tk.Toplevel(self.master)
