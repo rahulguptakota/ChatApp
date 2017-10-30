@@ -59,6 +59,7 @@ class Login:
         password = self.entry2.get()
         print(username,password)
         global s        
+        global selfpublickey
         publickey = s.recv(1024)
         print(publickey)
         publickey = RSA.importKey(publickey.decode())
@@ -191,8 +192,9 @@ class Chatbox:
         data = []
         data.append([])
         data[0].append(self.otheruser)
-        data.append(self.entry1.get())
-        s.send(pickle.dump(self.publickey.encrypt(data.encode('utf-8'),16)))
+        data.append(self.publickey.encrypt(self.entry1.get().encode('utf-8'), 16))
+        data = pickle.dumps(data)
+        s.send(data)
     
     def append_chat(self, data):
         self.chatLog.insert(tk.END, data)
@@ -219,6 +221,7 @@ class myThread(threading.Thread):
 def main(): 
     tkThread = myThread()
     global s
+    global selfprivatekey
     while(True):
         if(flag == 1):
             readable, writable, exceptional = select.select([s],[],[])
@@ -228,11 +231,13 @@ def main():
                 if data[0] == "Live users list":
                     objectdict["whoelse"].update_list(data[1])
                 else:
-                    try:
+                    decrypted_data = selfprivatekey.decrypt(data[1])
+                    try:                        
                         objectdict[data[0]].append_chat(data[1])
                     except KeyError:
                         objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
-                        objectdict = Chatbox(objectdict["whoelse"].newWindow[data[0]], data[0], publickeys[data[0]])
+                        objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], data[0], publickeys[data[0]])
+                        objectdict[data[0]].append_chat(data[1])
     # root = tk.Tk()
     # app = Login(root)
     # root.mainloop()
