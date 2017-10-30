@@ -6,7 +6,7 @@ import sys
 
 s = socket.socket()
 host = '192.168.0.106'
-port = 6000
+port = 8000
 s.connect((host, port))
 cnt = 0
 flag = 0
@@ -192,6 +192,7 @@ class Chatbox:
     def send_chat(self):
         data = []
         data.append([])
+        print(self.otheruser)
         data[0].append(self.otheruser)
         data.append(self.publickey.encrypt(self.entry1.get().encode('utf-8'), 16))
         data = pickle.dumps(data)
@@ -218,6 +219,7 @@ class myThread(threading.Thread):
         global close
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             close = 1
+            self.root.destroy()
             exit()
 
     def run(self):
@@ -245,6 +247,7 @@ def main():
                         objectdict[data[0]].append_chat(decrypted_data)
                     except KeyError:
                         objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
+                        print(data[0])
                         objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], data[0], publickeys[data[0]])
                         objectdict[data[0]].append_chat(decrypted_data)
         elif(close):

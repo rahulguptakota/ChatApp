@@ -87,7 +87,7 @@ class ClientThread(threading.Thread):
 						for user in data[0]:
 							print("Send {} to {} from {}".format(data[1],user,self.username))
 							message = []
-							message.append(user)
+							message.append(self.username)
 							message.append(data[1])
 							message_queues[user].put(message)
 							if logged_in_users[user][0] not in logged_in_users[user][-1]:
@@ -116,7 +116,7 @@ class ClientThread(threading.Thread):
 
 s = socket.socket()
 host = '0.0.0.0'
-port = 6000
+port = 8000
 s.bind((host, port))
 s.listen(5)
 # Sockets from which we expect to read
