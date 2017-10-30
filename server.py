@@ -68,12 +68,16 @@ class ClientThread(threading.Thread):
 			# print("logged in user list for {} is {}".format(self.username,logged_in_users[self.username][-1]))
 			for r in readable:
 				try:
-					data = pickle.load(r.recv(1024))									
-					for user in data[0]:
-						print("Send {} to {} from {}".format(data[1],user,self.username))
-						message_queues[user].put(data[1])
-						if logged_in_users[user][0] not in logged_in_users[user][-1]:
-							logged_in_users[user][-1].append(logged_in_users[user][0])
+					data = r.recv(1024)
+					if data.decode() == "Live users list":
+						self.clientsocket.send(pickle.dumps(logged_in_users_pub))
+					else:
+						data =  pickle.loads(data)								
+						for user in data[0]:
+							print("Send {} to {} from {}".format(data[1],user,self.username))
+							message_queues[user].put(data[1])
+							if logged_in_users[user][0] not in logged_in_users[user][-1]:
+								logged_in_users[user][-1].append(logged_in_users[user][0])
 				except:
 					print("Clossing connection for {}".format(self.username))
 					self.clientsocket.close()
