@@ -4,6 +4,8 @@ import os.path
 import time
 import select
 from queue import Queue
+import os
+from Crypto.PublicKey import RSA
 
 logged_in_users = {}
 message_queues = {}
@@ -57,8 +59,6 @@ class ClientThread(threading.Thread):
 							logged_in_users[self.username][-1].remove(s)
 						print("There is no message to send")
 						temp = 0
-				
-
 s = socket.socket()
 host = '127.0.0.1'
 port = 8000
@@ -71,13 +71,26 @@ outputs = [ ]
 # Outgoing message queues (socket:Queue)
 with open('users.txt') as f:
 		credentials = [x.strip().split(':') for x in f.readlines()]
+		f.close()
+
+with open('publickeys.txt') as f:
+		publickey = RSA.importKey(f.read())
+		f.close()
+
+with open('privatekey.txt') as f:
+		privatekey = RSA.importKey(f.read())
+		f.close()
+
 
 while True:
 	print("nListening for incoming connections...")
+	print(publickey.exportKey())
+	print(privatekey.exportKey())
 	(clientsock, (ip, port)) = s.accept()
 	clientsock.setblocking(0)
 	inputs.append(clientsock)
-	outputs.append(clientsock)	
+	outputs.append(clientsock)
+	clientsock.send(publickey.exportKey())	
 	data = clientsock.recv(1024)
 	[username,password] = pickle.loads(data)
 	message_queues[username] = Queue()

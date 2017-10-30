@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import socket, pickle, time
+from Crypto.PublicKey import RSA
 
 s = socket.socket()
 host = '127.0.0.1'
@@ -18,6 +19,8 @@ def Printname(event):
 	print(username,password)
 	s = socket.socket()
 	s.connect((host, port))
+	publickey=s.recv(1024)
+	print(publickey)
 	s.send(pickle.dumps([username,password]))
 	data = s.recv(1024)
 	print(data)
