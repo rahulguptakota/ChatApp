@@ -30,6 +30,7 @@ def Printname(event):
 			time.sleep(10)
 			button_1.config(state = NORMAL)
 		s.close()
+		exit()
 	global var
 	# var.withdraw()
 	s.send(pickle.dumps([["shubham"],"Hey This is shubham bitch!"]))

@@ -87,10 +87,11 @@ while True:
 		if username in logged_in_users:				
 			print(username," already logged in.")
 			clientsock.close()
+			continue
 		logged_in_users[username] = [clientsock, time.time(),clientsock,[]]
+		newthread = ClientThread(ip, port, username,clientsock)
+		newthread.start()
 	else:
 		print("Authentication unsuccessfull")
 		clientsock.send(("Authentication Failure!!!").encode())
 		clientsock.close()
-	newthread = ClientThread(ip, port, username,clientsock)
-	newthread.start()
