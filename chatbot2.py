@@ -110,11 +110,17 @@ class OnlinePeople:
         self.chat.pack()
         self.whoelse = tk.Button(self.frame, text = 'Whoelse', width = 25, command = self.liveusers)
         self.whoelse.pack()
+        self.wholasthr = tk.Button(self.frame, text = 'Wholasthr', width = 25, command = self.lasthourusers)
+        self.wholasthr.pack()
         self.broadcast = tk.Button(self.frame, text = 'Broadcast', width = 25, command = self.messageall)
         self.broadcast.pack()
         self.frame.pack()
         global flag 
         flag = 1
+
+    def lasthourusers(self):
+        global s
+        s.send("Live 1Hr users list".encode())
 
     def messageall(self):
         global s
@@ -260,6 +266,8 @@ def main():
                 data = pickle.loads(r.recv(1024))
                 print("this is data\n", data)
                 if data[0] == "Live users list":
+                    objectdict["whoelse"].update_list(data[1])
+                elif data[0] == "Live 1Hr users list":
                     objectdict["whoelse"].update_list(data[1])
                 else:
                     decrypted_data = selfprivatekey.decrypt(data[1])

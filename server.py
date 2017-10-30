@@ -10,6 +10,7 @@ from Crypto.PublicKey import RSA
 logged_in_users = {}
 logged_in_users_pub = {}
 message_queues = {}
+recently_connected = {}
 with open('users.txt') as f:
 	credentials = [x.strip().split(':') for x in f.readlines()]
 	f.close()
@@ -52,8 +53,9 @@ class ClientThread(threading.Thread):
 				exit()
 			else:
 				self.username = username
-				logged_in_users[self.username] = [self.clientsocket, time.time(),[]]
+				logged_in_users[self.username] = [self.clientsocket,[],1]
 				logged_in_users_pub[self.username] = clientpublickey
+				recently_connected[self.username] = time.time()
 		else:
 			print("Authentication unsuccessfull")
 			self.clientsocket.send(("Authentication Failure!!!").encode())
@@ -78,6 +80,14 @@ class ClientThread(threading.Thread):
 						data = []
 						data.append("Live users list")
 						data.append(logged_in_users_pub)
+						self.clientsocket.send(pickle.dumps(data))
+					elif data == "Live 1Hr users list".encode():
+						for item in recently_connected.keys():
+							if(time.time() - recently_connected[item] > 3600):
+								del recently_connected[item]
+						data = []
+						data.append("Live 1Hr users list")
+						data.append(recently_connected.keys())
 						self.clientsocket.send(pickle.dumps(data))
 					else:
 						data =  pickle.loads(data)
