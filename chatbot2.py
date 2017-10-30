@@ -105,8 +105,15 @@ class OnlinePeople:
 
     def liveusers(self):
         global s
-        s.send("liveuserslist".encode())
-        
+        s.send("Live users list".encode())
+        self.data = pickle.loads(s.recv(1024))
+        cs=self.Lb1.curselection()
+        self.Lb1.delete(0,tk.END)
+        i=0
+        for key in self.data:
+            self.Lb1.insert(i, key)
+            i = i + 1
+        print(self.data) 
 
     def start_chat(self):
         users = list(self.data.keys())
@@ -136,7 +143,7 @@ class Chatbox:
     def __init__(self, master, otheruser, publickey):
         self.master = master
         self.otheruser = otheruser
-        self.publickey = publickey
+        self.publickey = RSA.importKey(publickey.decode())
         # self.parent = parent
         self.frame = tk.Frame(self.master)
         self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")

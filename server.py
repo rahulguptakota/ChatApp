@@ -82,6 +82,7 @@ class ClientThread(threading.Thread):
 					print("Clossing connection for {}".format(self.username))
 					self.clientsocket.close()
 					del logged_in_users[self.username]
+					del logged_in_users_pub[self.username]
 					exit()
 			for s in writable:
 				temp = 1
