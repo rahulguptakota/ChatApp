@@ -5,7 +5,7 @@ from Crypto.PublicKey import RSA
 
 s = socket.socket()
 host = '127.0.0.1'
-port = 8000
+port = 6000
 cnt = 0
 
 var = Tk()
@@ -17,20 +17,27 @@ def Printname(event):
 	username = entry1.get()
 	password = entry2.get()
 	print(username,password)
-	# s = socket.socket()
-	# s.connect((host, port))
-	# s.send(pickle.dumps([username,password]))
-	# data = s.recv(1024)
-	# print(data)
-	# if ("Authentication Failure!!!").encode() in data:
-	# 	global cnt
-	# 	cnt = cnt + 1
-	# 	if(cnt%3 == 0):
-	# 		button_1.config(state = DISABLED)
-	# 		messagebox.showinfo("","You have been locked for 10s")
-	# 		time.sleep(10)
-	# 		button_1.config(state = NORMAL)
-	# 	s.close()
+	s = socket.socket()
+	s.connect((host, port))
+	publickey = s.recv(1024)
+	print(publickey)
+	publickey = RSA.importKey(publickey.decode())
+	username = publickey.encrypt(username.encode('utf-8'),16) #encrypt message with public key
+	# print(str(username))
+	password = publickey.encrypt(password.encode('utf-8'),16) #encrypt message with public key
+	s.send(pickle.dumps([username,password]))
+	data = s.recv(1024)
+	print(data)
+	if ("Authentication Failure!!!").encode() in data:
+		global cnt
+		cnt = cnt + 1
+		if(cnt%3 == 0):
+			button_1.config(state = DISABLED)
+			messagebox.showinfo("","You have been locked for 10s")
+			time.sleep(10)
+			button_1.config(state = NORMAL)
+		s.close()
+		exit()
 	global var
 	var.withdraw()
 	# s.send(pickle.dumps([["shubham"],"Hey This is shubham bitch!"]))
