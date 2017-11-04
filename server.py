@@ -24,6 +24,8 @@ with open('privatekey.txt') as f:
 	privatekey = RSA.importKey(f.read())
 	f.close()
 
+allusers = [u for [u,p] in credentials]
+
 class ClientThread(threading.Thread):
 
 	def __init__(self,ip,port,clientsocket):
@@ -36,7 +38,8 @@ class ClientThread(threading.Thread):
 
 	def run(self):
 		global message_queues
-		global logged_in_users    
+		global logged_in_users
+		global allusers    
 		print("Connection from : "+ip+":"+str(port))
 		self.clientsocket.send(publickey.exportKey())	
 		data = self.clientsocket.recv(1024)
@@ -88,6 +91,11 @@ class ClientThread(threading.Thread):
 						data = []
 						data.append("Live 1Hr users list")
 						data.append(recently_connected)
+						self.clientsocket.send(pickle.dumps(data))
+					elif data == "All users list".encode():
+						data = []
+						data.append("All users list")
+						data.append(allusers)
 						self.clientsocket.send(pickle.dumps(data))
 					else:
 						data =  pickle.loads(data)

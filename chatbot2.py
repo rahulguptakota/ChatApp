@@ -5,7 +5,7 @@ from Crypto.PublicKey import RSA
 import sys
 
 s = socket.socket()
-host = '192.168.0.104'
+host = '192.168.0.106'
 port = 6000
 s.connect((host, port))
 cnt = 0
@@ -108,6 +108,8 @@ class OnlinePeople:
         self.Lb1.pack()
         self.chat = tk.Button(self.frame, text = 'Chat', width = 25, command = self.start_chat)
         self.chat.pack()
+        self.Allusers = tk.Button(self.frame, text = 'Alluser', width = 25, command = self.allusers)
+        self.Allusers.pack()
         self.whoelse = tk.Button(self.frame, text = 'Whoelse', width = 25, command = self.liveusers)
         self.whoelse.pack()
         self.wholasthr = tk.Button(self.frame, text = 'Wholasthr', width = 25, command = self.lasthourusers)
@@ -149,6 +151,17 @@ class OnlinePeople:
         #     self.Lb1.insert(i, key)
         #     i = i + 1
         # print(self.data) 
+    def allusers(self):
+        global s
+        s.send("All users list".encode())
+        # self.data = pickle.loads(s.recv(1024))
+        # cs=self.Lb1.curselection()
+        # self.Lb1.delete(0,tk.END)
+        # i=0
+        # for key in self.data:
+        #     self.Lb1.insert(i, key)
+        #     i = i + 1
+        # print(self.data)
 
     def update_list(self, data):
         cs=self.Lb1.curselection()
@@ -269,6 +282,8 @@ def main():
                     objectdict["whoelse"].update_list(data[1])
                 elif data[0] == "Live 1Hr users list":
                     objectdict["whoelse"].update_list(list(data[1].keys()))
+                elif data[0] == "All users list":
+                    objectdict["whoelse"].update_list(data[1])
                 else:
                     decrypted_data = selfprivatekey.decrypt(data[1])
                     try:                        
