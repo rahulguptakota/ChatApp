@@ -128,14 +128,30 @@ class SignUp:
         Login(self.master)
 
     def submit(self):
+        s = socket.socket()
         s.connect((host, port))
-        pass
+        username = self.entry1.get()
+        password = self.entry2.get()
+        if(password != self.entry3.get()):
+            messagebox.showinfo("Password Entered Incorrectly","Passwords don't match")
+        else:
+            s.send(pickle.dumps([username,password]))
+            data = s.recv(1024)
+            if "Successfully signed up".encode() in data:
+                messagebox.showinfo("Sign Up","Congrats! You are signed up.")
+                self.to_login()
+            elif "User already registered.".encode() in data:
+                messagebox.showinfo("Sign Up","User already registered.")
+            else:
+                messagebox.showinfo("Sign Up","Failed. Try again.")
+        s.close()
 
 class OnlinePeople:
     def __init__(self, master,data={}):
         self.master = master
         self.newWindow = {}
         self.data = data
+        self.allusers1 = []
         global publickeys
         publickeys = data
         # self.parent = parent
@@ -159,9 +175,21 @@ class OnlinePeople:
         self.broadcast.pack()
         self.logout = tk.Button(self.frame, text = 'logout', width = 25, command = self.logout)
         self.logout.pack()
+        self.block = tk.Button(self.frame, text = 'block', width = 25, command = self.block_someone)
+        self.block.pack()
         self.frame.pack()
         global flag 
         flag = 1
+
+    def block_someone(self):
+        print("hello in block_someone")
+        global s
+        users = self.allusers1
+        print(users)
+        # print(self.Lb1.curselection()[0])
+        user = users[self.Lb1.curselection()[0]]
+        print(user)
+        s.send(("Block " + user).encode())
 
     def lasthourusers(self):
         global s
@@ -218,6 +246,16 @@ class OnlinePeople:
             self.Lb1.insert(i, key)
             i = i + 1
 
+    def update_all_user_list(self, data):
+        cs=self.Lb1.curselection()
+        self.Lb1.delete(0,tk.END)
+        i=0
+        print("in update_list ", data)
+        self.allusers1 = data
+        for key in data:
+            self.Lb1.insert(i, key)
+            i = i + 1
+ 
     def start_chat(self):
         users = list(self.data.keys())
         # print(self.Lb1.curselection()[0])
@@ -340,7 +378,9 @@ class myThread1(threading.Thread):
                         elif data[0] == "Live 1Hr users list":
                             objectdict["whoelse"].update_list(list(data[1].keys()))
                         elif data[0] == "All users list":
-                            objectdict["whoelse"].update_list(data[1])
+                            objectdict["whoelse"].update_all_user_list(data[1])
+                        elif data[0] == "Blocked":
+                            messagebox.showinfo("BLocked","You are blocked buddy")
                         else:
                             decrypted_data = selfprivatekey.decrypt(data[1])
                             try:                        
