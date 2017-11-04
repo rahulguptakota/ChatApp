@@ -97,6 +97,9 @@ class ClientThread(threading.Thread):
 						data.append("All users list")
 						data.append(allusers)
 						self.clientsocket.send(pickle.dumps(data))
+					elif data == "logout".encode():
+						self.clientsocket.close()
+						exit()
 					else:
 						data =  pickle.loads(data)
 						print(data)

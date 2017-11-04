@@ -4,10 +4,9 @@ import socket, pickle, time, threading, select
 from Crypto.PublicKey import RSA
 import sys
 
-s = socket.socket()
+s = ""
 host = '192.168.0.106'
 port = 6000
-s.connect((host, port))
 cnt = 0
 flag = 0
 close = 0
@@ -61,6 +60,8 @@ class Login:
         print(username,password)
         global s        
         global selfpublickey
+        s = socket.socket()
+        s.connect((host, port))
         publickey = s.recv(1024)
         print(publickey)
         publickey = RSA.importKey(publickey.decode())
@@ -116,6 +117,8 @@ class OnlinePeople:
         self.wholasthr.pack()
         self.broadcast = tk.Button(self.frame, text = 'Broadcast', width = 25, command = self.messageall)
         self.broadcast.pack()
+        self.logout = tk.Button(self.frame, text = 'logout', width = 25, command = self.logout)
+        self.logout.pack()
         self.frame.pack()
         global flag 
         flag = 1
@@ -198,7 +201,13 @@ class OnlinePeople:
         
         print (user)
         # self.frame.destroy()                
-        
+    
+    def logout(self):
+        global s
+        s.send("logout".encode())
+        s.close()
+        self.frame.destroy()
+        Login(self.master)
 
 class Chatbox:
     def __init__(self, master, otheruser):
