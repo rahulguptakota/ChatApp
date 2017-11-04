@@ -87,7 +87,7 @@ class Login:
             print(data)
             self.frame.destroy()                       
             objectdict["whoelse"] = OnlinePeople(self.master, data[1])
-
+            myThread1()
         # self.frame.destroy()
         # self.app = OnlinePeople(self.master)
 
@@ -276,34 +276,49 @@ class myThread(threading.Thread):
         Login(self.root)
         self.root.mainloop()
 
+class myThread1(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.start()
+
+    def callback(self):
+        self.root.quit()
+
+    def run(self):
+        global s
+        global selfprivatekey
+        while(True):
+            if(flag == 1):
+                try:
+                    readable, writable, exceptional = select.select([s],[],[],0.1)
+                    for r in readable:
+                        data = pickle.loads(r.recv(1024))
+                        print("this is data\n", data)
+                        if data[0] == "Live users list":
+                            objectdict["whoelse"].update_list(data[1])
+                        elif data[0] == "Live 1Hr users list":
+                            objectdict["whoelse"].update_list(list(data[1].keys()))
+                        elif data[0] == "All users list":
+                            objectdict["whoelse"].update_list(data[1])
+                        else:
+                            decrypted_data = selfprivatekey.decrypt(data[1])
+                            try:                        
+                                objectdict[data[0]].append_chat(decrypted_data, data[0])
+                            except KeyError:
+                                objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
+                                print(data[0])
+                                objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], [data[0]])
+                                objectdict[data[0]].append_chat(decrypted_data, data[0])
+                except:
+                    exit()
+                    print("Error")
+            elif(close):
+                exit()
 
 def main(): 
     tkThread = myThread()
-    global s
-    global selfprivatekey
-    while(True):
-        if(flag == 1):
-            readable, writable, exceptional = select.select([s],[],[])
-            for r in readable:
-                data = pickle.loads(r.recv(1024))
-                print("this is data\n", data)
-                if data[0] == "Live users list":
-                    objectdict["whoelse"].update_list(data[1])
-                elif data[0] == "Live 1Hr users list":
-                    objectdict["whoelse"].update_list(list(data[1].keys()))
-                elif data[0] == "All users list":
-                    objectdict["whoelse"].update_list(data[1])
-                else:
-                    decrypted_data = selfprivatekey.decrypt(data[1])
-                    try:                        
-                        objectdict[data[0]].append_chat(decrypted_data, data[0])
-                    except KeyError:
-                        objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
-                        print(data[0])
-                        objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], [data[0]])
-                        objectdict[data[0]].append_chat(decrypted_data, data[0])
-        elif(close):
-            exit()
+    select = myThread1()
     # root = tk.Tk()
     # app = Login(root)
     # root.mainloop()
