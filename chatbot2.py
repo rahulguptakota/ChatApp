@@ -6,7 +6,7 @@ import sys
 
 s = ""
 host = '192.168.0.106'
-port = 6000
+port = 8000
 cnt = 0
 flag = 0
 close = 0
@@ -72,7 +72,12 @@ class Login:
         username = publickey.encrypt(username.encode('utf-8'),16) #encrypt message with public key
         # print(str(username))
         password = publickey.encrypt(password.encode('utf-8'),16) #encrypt message with public key
-        s.send(pickle.dumps([username,password,selfpublickey.exportKey()]))
+        data = {}
+        data["username"] = username
+        data["password"] = password
+        data["pubkey"] = selfpublickey.exportKey().decode()
+        data["signup"] = 0
+        s.send(pickle.dumps(data))
         data = s.recv(1024)
         # data = "Authentication Failure!!!".encode()
         # data = "success".encode()
@@ -135,7 +140,12 @@ class SignUp:
         if(password != self.entry3.get()):
             messagebox.showinfo("Password Entered Incorrectly","Passwords don't match")
         else:
-            s.send(pickle.dumps([username,password]))
+            data = {}
+            data["username"] = username
+            data["password"] = password
+            data["pubkey"] = selfpublickey.exportKey().decode()
+            data["signup"] = 1
+            s.send(pickle.dumps(data))
             data = s.recv(1024)
             if "Successfully signed up".encode() in data:
                 messagebox.showinfo("Sign Up","Congrats! You are signed up.")
@@ -173,12 +183,14 @@ class OnlinePeople:
         self.wholasthr.pack()
         self.broadcast = tk.Button(self.frame, text = 'Broadcast', width = 25, command = self.messageall)
         self.broadcast.pack()
-        self.logout = tk.Button(self.frame, text = 'logout', width = 25, command = self.logout)
+        self.logout = tk.Button(self.frame, text = 'logout', width = 25, command = self.Logout)
         self.logout.pack()
         self.block = tk.Button(self.frame, text = 'block', width = 25, command = self.block_someone)
         self.block.pack()
         self.unblock = tk.Button(self.frame, text = 'Unblock', width = 25, command = self.unblock_someone)
         self.unblock.pack()
+        self.asyncchat = tk.Button(self.frame, text = 'Asyncchat', width = 25, command = self.start_asyncchat)
+        self.asyncchat.pack()
         self.frame.pack()
         global flag 
         flag = 1
@@ -186,7 +198,7 @@ class OnlinePeople:
     def block_someone(self):
         print("hello in block_someone")
         global s
-        users = self.allusers1
+        users = list(self.allusers1.keys())
         print(users)
         # print(self.Lb1.curselection()[0])
         user = users[self.Lb1.curselection()[0]]
@@ -196,7 +208,7 @@ class OnlinePeople:
     def unblock_someone(self):
         print("hello in unblock_someone")
         global s
-        users = self.allusers1
+        users = list(self.allusers1.keys())
         # print(self.Lb1.curselection()[0])
         user = users[self.Lb1.curselection()[0]]
         s.send(("Unblock " + user).encode())
@@ -248,10 +260,10 @@ class OnlinePeople:
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
-        print("in update_list ", data)
+        print("in update_live_user_list ", data)
         self.data = data
-        global publickeys
-        publickeys = data
+        # global publickeys
+        # publickeys = data
         for key in data:
             self.Lb1.insert(i, key)
             i = i + 1
@@ -261,7 +273,7 @@ class OnlinePeople:
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
-        print("in update_list ", data)
+        print("in update_1hr_list ", data)
         for key in data:
             self.Lb1.insert(i, key)
             i = i + 1
@@ -270,13 +282,40 @@ class OnlinePeople:
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
-        print("in update_list ", data)
+        print("in update_all_user_list ", data)
         self.allusers1 = data
+        global publickeys
+        publickeys = data
         for key in data:
             self.Lb1.insert(i, key)
             # listbox.itemconfig("end", bg = "red" if  else "green")
             i = i + 1
- 
+
+    def start_asyncchat(self):
+        users = list(self.allusers1.keys())
+        # print(self.Lb1.curselection()[0])
+        user = users[self.Lb1.curselection()[0]]
+
+        if(user in self.newWindow):
+            # self.app = Chatbox(self.newWindow[num])
+            print(self.newWindow[user].winfo_exists())
+            if(not self.newWindow[user].winfo_exists()):
+                self.newWindow[user] = tk.Toplevel(self.master)
+                objectdict[user] = Chatbox(self.newWindow[user], [user])
+            # print ("Hallelujah")
+        else:
+            self.newWindow[user] = tk.Toplevel(self.master)
+            objectdict[user] = Chatbox(self.newWindow[user], [user])
+        # print(self.Lb1.curselection())
+        # self.frame.destroy()
+        # self.app = Chatbox(self.newWindow)
+
+        print (self.newWindow)
+        
+        print (user)
+        # self.frame.destroy()  
+
+
     def start_chat(self):
         users = list(self.data.keys())
         # print(self.Lb1.curselection()[0])
@@ -301,7 +340,7 @@ class OnlinePeople:
         print (user)
         # self.frame.destroy()                
     
-    def logout(self):
+    def Logout(self):
         global s
         s.send("logout".encode())
         s.close()
@@ -330,7 +369,7 @@ class Chatbox:
         self.quit = tk.Button(self.frame, text = 'Quit', command = self.quit_chat)
         self.quit.grid(row=2, column=1, sticky="news")
         self.frame.pack()
-        objectdict["whoelse"].liveusers()
+        # objectdict["whoelse"].liveusers()
 
     def send_chat(self):
         data = {}
@@ -365,7 +404,10 @@ class myThread(threading.Thread):
 
     def on_closing(self):
         global close
+        global s
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            s.send("logout".encode())
+            s.close()
             close = 1
             exit()
             self.root.destroy()
@@ -404,8 +446,10 @@ class myThread1(threading.Thread):
                         elif data[0] == "Blocked":
                             messagebox.showinfo("BLocked","You are blocked buddy")
                         else:
+                            print("encrypted_data: ", data[1])
                             decrypted_data = selfprivatekey.decrypt(data[1])
-                            try:                        
+                            try:                    
+                                print("decrypted_data", decrypted_data)    
                                 objectdict[data[0]].append_chat(decrypted_data, data[0])
                             except KeyError:
                                 objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)

@@ -1,4 +1,1 @@
-shubham:sharma
-rahul:gupta
-ameya:loya
-qwert:qwert
+{"shubham": {"username": "shubham", "pubkey": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDYbIu+Qah2YKLYptQk0OxnZtHR\n3ROanZawKfufsMjol49RC3y3LXMWdIrxpy2QMCArGQ7aGU/dGtKsO3gtUlo/0n+U\nizjm6ndbLR3Pw3xS9KDhlo5fN8BrUGBzGzcqm0MbmqZJsivnWFQBnFff//a0swqa\nmTFCUXY4aA1L0odjdwIDAQAB\n-----END PUBLIC KEY-----", "password": "sharma"}, "rahul": {"username": "rahul", "pubkey": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDYbIu+Qah2YKLYptQk0OxnZtHR\n3ROanZawKfufsMjol49RC3y3LXMWdIrxpy2QMCArGQ7aGU/dGtKsO3gtUlo/0n+U\nizjm6ndbLR3Pw3xS9KDhlo5fN8BrUGBzGzcqm0MbmqZJsivnWFQBnFff//a0swqa\nmTFCUXY4aA1L0odjdwIDAQAB\n-----END PUBLIC KEY-----", "password": "gupta"}}

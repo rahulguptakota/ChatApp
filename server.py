@@ -6,12 +6,14 @@ import select
 from queue import Queue
 import os
 from Crypto.PublicKey import RSA
+import json
 
 logged_in_users = {}
 logged_in_users_pub = {}
+users_pub = {}
 message_queues = {}
 recently_connected = {}
-credentials = ""
+credentials = {}
 blocked = {}
 
 with open('publickeys.txt') as f:
@@ -23,7 +25,15 @@ with open('privatekey.txt') as f:
     privatekey = RSA.importKey(f.read())
     f.close()
 
-allusers = ""
+with open('users.txt','r') as f:
+    credentials = json.load(f)
+    f.close()
+    print(credentials)
+
+for user in credentials.keys():
+    users_pub[user] = credentials[user]["pubkey"]
+    blocked[user] = []
+    message_queues[user] = Queue()
 
 class ClientThread(threading.Thread):
 
@@ -38,59 +48,56 @@ class ClientThread(threading.Thread):
     def run(self):
         global message_queues
         global logged_in_users
-        global allusers
+        global users_pub
         global credentials
-        global blocked
-        with open('users.txt') as f:
-            credentials = [x.strip().split(':') for x in f.readlines()]
-            f.close()
-        allusers = [u for [u,p] in credentials]
-        for user in allusers:
-            blocked[user] = []
+        global blocked         
+        # for [u,p,c] in credentials:
+        #     users_pub[u] = c        
         print("Connection from : "+ip+":"+str(port))
         self.clientsocket.send(publickey.exportKey())	
         data = self.clientsocket.recv(1024)
         data = pickle.loads(data)
-        signup = 1
-        username = ""
-        password = ""
-        clientpublickey = ""
-        try:
-            data[2]
-            username = data[0]
-            password = data[1]
-            clientpublickey = data[2]
-            signup = 0
-        except:
-            username = data[0]
-            password = data[1]
+        print(data)
+        signup = data["signup"]
+        username = data["username"]
+        password = data["password"]
+        clientpublickey = data["pubkey"]
         if signup == 1:
-            if username in allusers:
+            if username in credentials.keys():
                 self.clientsocket.send("User already registered.".encode())
             else:
-                with open("users.txt", "a") as myfile:
+                with open("users.txt", "w") as myfile:
                     print(username,password)
-                    myfile.write(username + ":" + password + "\n")
+                    del data["signup"]
+                    credentials[username] = data
+                    users_pub[user] = credentials[user]["pubkey"]
+                    json.dump(credentials,myfile)
                     myfile.close()
-                self.clientsocket.send("Successfully signed up".encode())                
+                self.clientsocket.send("Successfully signed up".encode())
                 blocked[username] = []
+                message_queues[username] = Queue()
             self.clientsocket.close()
             exit()
         username = privatekey.decrypt(username).decode()
         password =privatekey.decrypt(password).decode()
-        message_queues[username] = Queue()
         # print(username,password,clientpublickey,credentials)
-        if [username,password] in credentials:
+        if username == credentials[username]["username"] and password == credentials[username]["password"]:
             print("Authentication sucessfull")			
             if username in logged_in_users:				
                 print(username," already logged in.")
                 self.clientsocket.close()
                 exit()
             else:
+                print("hurray!! new login")
                 self.username = username
                 logged_in_users[self.username] = [self.clientsocket,[]]
                 logged_in_users_pub[self.username] = clientpublickey
                 recently_connected[self.username] = time.time()
+                if not message_queues[self.username].empty():
+                    print("yes! i have got messages")
+                    if logged_in_users[self.username][0] not in logged_in_users[self.username][-1]:
+                        print("yeah, i am adding socket to writable")
+                        logged_in_users[self.username][-1].append(logged_in_users[self.username][0])
         else:
             print("Authentication unsuccessfull")
             self.clientsocket.send(("Authentication Failure!!!").encode())
@@ -129,7 +136,8 @@ class ClientThread(threading.Thread):
                 elif data == "All users list".encode():
                     data = []
                     data.append("All users list")
-                    data.append(allusers)
+                    data.append(users_pub)
+                    print("in all users list ", users_pub)
                     self.clientsocket.send(pickle.dumps(data))
                 elif "Block".encode() in data:
                     print("Heyyyyyyyyy", data.decode().split(' ')[1] , data.decode())
@@ -153,7 +161,7 @@ class ClientThread(threading.Thread):
                         message.append(self.username)
                         message.append(data[user])
                         if self.username not in blocked[user]:
-                            message_queues[user].put(message)
+                            message_queues[user].put(message)                        
                         else:
                             message = []
                             message.append("Blocked")
@@ -161,7 +169,9 @@ class ClientThread(threading.Thread):
                             print("in blocked for user: ", user, " ")
                             if logged_in_users[self.username][0] not in logged_in_users[self.username][-1]:
                                 logged_in_users[self.username][-1].append(logged_in_users[self.username][0])
-                        if logged_in_users[user][0] not in logged_in_users[user][-1]:
+                        if user not in logged_in_users :
+                            pass
+                        elif logged_in_users[user][0] not in logged_in_users[user][-1]:
                             logged_in_users[user][-1].append(logged_in_users[user][0])
                     # except:
                     #     print("Clossing connection for {}".format(self.username))
@@ -175,10 +185,10 @@ class ClientThread(threading.Thread):
                     try:
                         print(self.username)
                         # print(message_queues[self.username].get())
-                        next_msg = message_queues[self.username].get_nowait()
-                        print(next_msg)
+                        next_msg = message_queues[self.username].get()
+                        print("in queue: ", next_msg)
                         s.send(pickle.dumps(next_msg))
-                    except:
+                    except Queue.Empty :
                         print("time to remove ", self.username)
                         if s in logged_in_users[self.username][-1]:
                             print("in if")
@@ -188,7 +198,7 @@ class ClientThread(threading.Thread):
 
 s = socket.socket()
 host = '0.0.0.0'
-port = 6000
+port = 8000
 s.bind((host, port))
 s.listen(5)
 # Sockets from which we expect to read
