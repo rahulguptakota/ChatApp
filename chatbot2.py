@@ -48,10 +48,14 @@ class Login:
         self.master.bind('<Return>', self.new_window)
         self.button_1 = tk.Button(top_frame, text = "Login", fg = "yellow", bg = "black", command = self.new_window)
         # button_1.bind("<Button-1>", Printname)
-        self.button_2 = tk.Button(top_frame, text = "Reset")
+        self.button_2 = tk.Button(top_frame, text = "Sign Up", command = self.sign_up)
         self.button_1.pack(side = tk.LEFT)
         self.button_2.pack(side = tk.LEFT)
         self.frame.pack()
+
+    def sign_up(self, event=None):
+        self.frame.destroy()                       
+        objectdict["signup"] = SignUp(self.master)
 
     def new_window(self, event=None):
         # self.newWindow = tk.Toplevel(self.master)
@@ -90,6 +94,42 @@ class Login:
             myThread1()
         # self.frame.destroy()
         # self.app = OnlinePeople(self.master)
+
+class SignUp:
+    def __init__(self, master,data={}):
+        self.master = master
+        self.frame = tk.Frame(self.master)
+        name = tk.Label(self.frame, text = "Name")
+        password = tk.Label(self.frame, text = "Password")
+        confirmpassword = tk.Label(self.frame, text = "Confirm Password")
+        name.grid(row=0, sticky = tk.E)
+        password.grid(row=1, sticky = tk.E)
+        confirmpassword.grid(row=2, sticky = tk.E)
+        self.entry1 = tk.Entry(self.frame)
+        self.entry2 = tk.Entry(self.frame, show="*")
+        self.entry3 = tk.Entry(self.frame, show="*")
+        self.entry1.grid(row=0, column=1)
+        self.entry2.grid(row=1, column=1)
+        self.entry3.grid(row=2, column=1)
+
+        top_frame = tk.Frame(self.frame)
+        top_frame.grid(row=3, columnspan=2)
+
+        self.master.bind('<Return>', self.submit)
+        self.button_1 = tk.Button(top_frame, text = "Back to Login", fg = "yellow", bg = "black", command = self.to_login)
+        # button_1.bind("<Button-1>", Printname)
+        self.button_2 = tk.Button(top_frame, text = "Submit And Login", command = self.submit)
+        self.button_1.pack(side = tk.LEFT)
+        self.button_2.pack(side = tk.LEFT)
+        self.frame.pack()
+
+    def to_login(self):
+        self.frame.destroy()
+        Login(self.master)
+
+    def submit(self):
+        s.connect((host, port))
+        pass
 
 class OnlinePeople:
     def __init__(self, master,data={}):
@@ -267,8 +307,8 @@ class myThread(threading.Thread):
         global close
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             close = 1
-            self.root.destroy()
             exit()
+            self.root.destroy()
 
     def run(self):
         self.root = tk.Tk()        
@@ -314,6 +354,7 @@ class myThread1(threading.Thread):
                     exit()
                     print("Error")
             elif(close):
+                print("I am in close")
                 exit()
 
 def main(): 
