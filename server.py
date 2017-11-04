@@ -142,6 +142,7 @@ class ClientThread(threading.Thread):
                     self.clientsocket.close()
                     exit()
                 else:
+                    # try:
                     data =  pickle.loads(data)
                     print(data)
                     # global privatekey
@@ -157,16 +158,17 @@ class ClientThread(threading.Thread):
                             message = []
                             message.append("Blocked")
                             message_queues[self.username].put(message)
+                            print("in blocked for user: ", user, " ")
                             if logged_in_users[self.username][0] not in logged_in_users[self.username][-1]:
                                 logged_in_users[self.username][-1].append(logged_in_users[self.username][0])
                         if logged_in_users[user][0] not in logged_in_users[user][-1]:
                             logged_in_users[user][-1].append(logged_in_users[user][0])
-                # except:
-                #     print("Clossing connection for {}".format(self.username))
-                #     self.clientsocket.close()
-                #     del logged_in_users[self.username]
-                #     del logged_in_users_pub[self.username]
-                #     exit()
+                    # except:
+                    #     print("Clossing connection for {}".format(self.username))
+                    #     self.clientsocket.close()
+                    #     del logged_in_users[self.username]
+                    #     del logged_in_users_pub[self.username]
+                    #     exit()
             for s in writable:
                 temp = 1
                 while temp:

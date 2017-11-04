@@ -177,6 +177,8 @@ class OnlinePeople:
         self.logout.pack()
         self.block = tk.Button(self.frame, text = 'block', width = 25, command = self.block_someone)
         self.block.pack()
+        self.unblock = tk.Button(self.frame, text = 'Unblock', width = 25, command = self.unblock_someone)
+        self.unblock.pack()
         self.frame.pack()
         global flag 
         flag = 1
@@ -190,6 +192,14 @@ class OnlinePeople:
         user = users[self.Lb1.curselection()[0]]
         print(user)
         s.send(("Block " + user).encode())
+
+    def unblock_someone(self):
+        print("hello in unblock_someone")
+        global s
+        users = self.allusers1
+        # print(self.Lb1.curselection()[0])
+        user = users[self.Lb1.curselection()[0]]
+        s.send(("Unblock " + user).encode())
 
     def lasthourusers(self):
         global s
@@ -234,7 +244,7 @@ class OnlinePeople:
         #     i = i + 1
         # print(self.data)
 
-    def update_list(self, data):
+    def update_live_user_list(self, data):
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
@@ -242,6 +252,16 @@ class OnlinePeople:
         self.data = data
         global publickeys
         publickeys = data
+        for key in data:
+            self.Lb1.insert(i, key)
+            i = i + 1
+
+
+    def update_1hr_list(self, data):
+        cs=self.Lb1.curselection()
+        self.Lb1.delete(0,tk.END)
+        i=0
+        print("in update_list ", data)
         for key in data:
             self.Lb1.insert(i, key)
             i = i + 1
@@ -254,6 +274,7 @@ class OnlinePeople:
         self.allusers1 = data
         for key in data:
             self.Lb1.insert(i, key)
+            # listbox.itemconfig("end", bg = "red" if  else "green")
             i = i + 1
  
     def start_chat(self):
@@ -266,7 +287,7 @@ class OnlinePeople:
             print(self.newWindow[user].winfo_exists())
             if(not self.newWindow[user].winfo_exists()):
                 self.newWindow[user] = tk.Toplevel(self.master)
-                objectdict[user] = Chatbox(self.newWindow[user], [])
+                objectdict[user] = Chatbox(self.newWindow[user], [user])
             # print ("Hallelujah")
         else:
             self.newWindow[user] = tk.Toplevel(self.master)
@@ -315,6 +336,7 @@ class Chatbox:
         data = {}
         global publickeys
         senddata = self.entry1.get()
+        print("I am in send_chat",senddata,self.otheruser)
         for users in self.otheruser:
             data[users] = RSA.importKey(publickeys[users]).encrypt(senddata.encode('utf-8'), 16)
         self.chatLog.insert(tk.END, "You: " + senddata+"\n")
@@ -374,9 +396,9 @@ class myThread1(threading.Thread):
                         data = pickle.loads(r.recv(1024))
                         print("this is data\n", data)
                         if data[0] == "Live users list":
-                            objectdict["whoelse"].update_list(data[1])
+                            objectdict["whoelse"].update_live_user_list(data[1])
                         elif data[0] == "Live 1Hr users list":
-                            objectdict["whoelse"].update_list(list(data[1].keys()))
+                            objectdict["whoelse"].update_1hr_list(list(data[1].keys()))
                         elif data[0] == "All users list":
                             objectdict["whoelse"].update_all_user_list(data[1])
                         elif data[0] == "Blocked":
