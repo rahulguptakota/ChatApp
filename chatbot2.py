@@ -140,12 +140,11 @@ class SignUp:
 
 class OnlinePeople:
     def __init__(self, master,data={}):
+        global publickeys
         self.master = master
         self.newWindow = {}
-        self.data = data #whatever data is used to display list on gui
-        #publickeys dict should always be updated with data of all users
-        #this implies i should always take public key from publickeys
-        #this necessitates that i update publickeys everytime
+        self.data = data #whatever data is used to display list on gui with public keys
+        publickeys = data
         self.frame = tk.Frame(self.master)
         self.Lb1 = tk.Listbox(self.frame)
         i=0
@@ -213,10 +212,13 @@ class OnlinePeople:
         s.send("All users list".encode())
 
     def update_list(self, data):
+        global publickeys
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
         self.data = data
+        for user in self.data:
+            publickeys[user] = self.data[user]
         for key in data.keys():
             self.Lb1.insert(i, key)
             i = i + 1
@@ -329,6 +331,7 @@ class myThread1(threading.Thread):
     def run(self):
         global s
         global selfprivatekey
+        global publickeys
         while(True):
             if(flag == 1):
                 try:
@@ -350,7 +353,7 @@ class myThread1(threading.Thread):
                                 objectdict[data[0]].append_chat(decrypted_data, data[0])
                             except KeyError:
                                 objectdict["whoelse"].newWindow[data[0]] = tk.Toplevel(objectdict["whoelse"].master)
-                                objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], [data[0]])
+                                objectdict[data[0]] = Chatbox(objectdict["whoelse"].newWindow[data[0]], {data[0]:publickeys[data[0]]})
                                 objectdict[data[0]].append_chat(decrypted_data, data[0])
                 except:
                     exit()
