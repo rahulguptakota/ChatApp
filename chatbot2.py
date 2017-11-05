@@ -217,8 +217,6 @@ class OnlinePeople:
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
-        print("before update_live_user_list data was: ", self.data)
-        print("updating live user list: ", data)
         self.data = data
         for key in data:
             self.Lb1.insert(i, key)
@@ -299,7 +297,6 @@ class Chatbox:
         for users in self.otheruser:
             data[users] = RSA.importKey(publickeys[users]).encrypt(senddata.encode('utf-8'), 16)
         self.chatLog.insert(tk.END, "You: " + senddata+"\n")
-        print("I am in send chat data is {}".format(data))
         data = pickle.dumps(data)
         s.send(data)
     

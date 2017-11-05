@@ -133,7 +133,6 @@ class ClientThread(threading.Thread):
                 else:
                     try:
                         data =  pickle.loads(data)
-                        print("I am in readable server {}".format(data))
                         for user in data.keys():
                             message = []
                             message.append(self.username)
@@ -158,9 +157,9 @@ class ClientThread(threading.Thread):
                 temp = 1
                 while temp:
                     try:
-                        next_msg = message_queues[self.username].get()
+                        next_msg = message_queues[self.username].get_nowait()
                         s.send(pickle.dumps(next_msg))
-                    except Queue.Empty :
+                    except:
                         if s in logged_in_users[self.username][-1]:
                             logged_in_users[self.username][-1].remove(s)
                         temp = 0
