@@ -63,7 +63,7 @@ class ClientThread(threading.Thread):
                 with open("users.txt", "w") as myfile:
                     del data["signup"]
                     credentials[username] = data
-                    users_pub[user] = credentials[user]["pubkey"]
+                    users_pub[username] = credentials[username]["pubkey"]
                     json.dump(credentials,myfile)
                     myfile.close()
                 self.clientsocket.send("Successfully signed up".encode())
@@ -133,6 +133,7 @@ class ClientThread(threading.Thread):
                 else:
                     try:
                         data =  pickle.loads(data)
+                        print("I am in readable server {}".format(data))
                         for user in data.keys():
                             message = []
                             message.append(self.username)

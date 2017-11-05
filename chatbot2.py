@@ -299,6 +299,7 @@ class Chatbox:
         for users in self.otheruser:
             data[users] = RSA.importKey(publickeys[users]).encrypt(senddata.encode('utf-8'), 16)
         self.chatLog.insert(tk.END, "You: " + senddata+"\n")
+        print("I am in send chat data is {}".format(data))
         data = pickle.dumps(data)
         s.send(data)
     
