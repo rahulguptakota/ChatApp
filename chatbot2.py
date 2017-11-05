@@ -60,7 +60,7 @@ class Login:
         global selfpublickey
         s = socket.socket()
         s.connect((host, port))
-        publickey = s.recv(1024)
+        publickey = s.recv(8192)
         publickey = RSA.importKey(publickey.decode())
         username = publickey.encrypt(username.encode('utf-8'),16) #encrypt message with public key
         password = publickey.encrypt(password.encode('utf-8'),16) #encrypt message with public key
@@ -70,7 +70,7 @@ class Login:
         data["pubkey"] = selfpublickey.exportKey().decode()
         data["signup"] = 0
         s.send(pickle.dumps(data))
-        data = s.recv(1024)
+        data = s.recv(8192)
         if ("Authentication Failure!!!").encode() in data:
             global cnt
             cnt = cnt + 1
@@ -107,7 +107,7 @@ class SignUp:
         top_frame.grid(row=3, columnspan=2)
         self.master.bind('<Return>', self.submit)
         self.button_1 = tk.Button(top_frame, text = "Back to Login", fg = "yellow", bg = "black", command = self.to_login)
-        self.button_2 = tk.Button(top_frame, text = "Submit And Login", command = self.submit)
+        self.button_2 = tk.Button(top_frame, text = "Submit", command = self.submit)
         self.button_1.pack(side = tk.LEFT)
         self.button_2.pack(side = tk.LEFT)
         self.frame.pack()
@@ -124,13 +124,17 @@ class SignUp:
         if(password != self.entry3.get()):
             messagebox.showinfo("Password Entered Incorrectly","Passwords don't match")
         else:
+            publickey = s.recv(8192)
+            publickey = RSA.importKey(publickey.decode())
+            username = publickey.encrypt(username.encode('utf-8'),16) #encrypt message with public key
+            password = publickey.encrypt(password.encode('utf-8'),16) #encrypt message with public key
             data = {}
             data["username"] = username
             data["password"] = password
             data["pubkey"] = selfpublickey.exportKey().decode()
             data["signup"] = 1
             s.send(pickle.dumps(data))
-            data = s.recv(1024)
+            data = s.recv(8192)
             if "Successfully signed up".encode() in data:
                 messagebox.showinfo("Sign Up","Congrats! You are signed up.")
                 self.to_login()
@@ -203,7 +207,6 @@ class OnlinePeople:
             objectdict[user] = Chatbox(self.newWindow[user], self.data)
 
     def liveusers(self):
-        print("live users list is called : ")
         global s
         s.send("Live users list".encode())
  
@@ -288,7 +291,7 @@ class Chatbox:
         if len(self.otherusers) > 1: #broadcast
             del objectdict["Broadcast"]
         else:
-            del objectdict[self.otherusers[0]]
+            del objectdict[list(self.otherusers.keys())[0]]
         self.master.destroy()
 
 
@@ -338,9 +341,8 @@ class myThread1(threading.Thread):
                 try:
                     readable, writable, exceptional = select.select([s],[],[],0.1)
                     for r in readable:
-                        data = pickle.loads(r.recv(1024))
+                        data = pickle.loads(r.recv(8192))
                         if data[0] == "Live users list": 
-                            print("command to update live users list recvd")
                             objectdict["whoelse"].update_list(data[1])
                         elif data[0] == "Live 1Hr users list":
                             objectdict["whoelse"].update_list(data[1])

@@ -25,7 +25,10 @@ with open('privatekey.txt') as f:
     f.close()
 
 with open('users.txt','r') as f:
-    credentials = json.load(f)
+    try:
+        credentials = json.load(f)
+    except:
+        pass
     f.close()
 
 for user in credentials.keys():
@@ -50,12 +53,16 @@ class ClientThread(threading.Thread):
         global credentials
         global blocked
         self.clientsocket.send(publickey.exportKey())	
-        data = self.clientsocket.recv(1024)
+        data = self.clientsocket.recv(8192)
         data = pickle.loads(data)
         signup = data["signup"]
         username = data["username"]
         password = data["password"]
         clientpublickey = data["pubkey"]
+        username = privatekey.decrypt(username).decode()
+        password = privatekey.decrypt(password).decode()
+        data["username"] = username
+        data["password"] = password
         if signup == 1:
             if username in credentials.keys():
                 self.clientsocket.send("User already registered.".encode())
@@ -71,21 +78,25 @@ class ClientThread(threading.Thread):
                 message_queues[username] = Queue()
             self.clientsocket.close()
             exit()
-        username = privatekey.decrypt(username).decode()
-        password =privatekey.decrypt(password).decode()
-        if username == credentials[username]["username"] and password == credentials[username]["password"]:	
-            if username in logged_in_users:				
+        try:
+            credentials[username]
+            if username == credentials[username]["username"] and password == credentials[username]["password"]:	
+                if username in logged_in_users:				
+                    self.clientsocket.close()
+                    exit()
+                else:
+                    self.username = username
+                    logged_in_users[self.username] = [self.clientsocket,[]]
+                    users_pub[self.username] = clientpublickey
+                    recently_connected[self.username] = time.time()
+                    if not message_queues[self.username].empty():
+                        if logged_in_users[self.username][0] not in logged_in_users[self.username][-1]:
+                            logged_in_users[self.username][-1].append(logged_in_users[self.username][0])
+            else:
+                self.clientsocket.send(("Authentication Failure!!!").encode())
                 self.clientsocket.close()
                 exit()
-            else:
-                self.username = username
-                logged_in_users[self.username] = [self.clientsocket,[]]
-                users_pub[self.username] = clientpublickey
-                recently_connected[self.username] = time.time()
-                if not message_queues[self.username].empty():
-                    if logged_in_users[self.username][0] not in logged_in_users[self.username][-1]:
-                        logged_in_users[self.username][-1].append(logged_in_users[self.username][0])
-        else:
+        except:
             self.clientsocket.send(("Authentication Failure!!!").encode())
             self.clientsocket.close()
             exit()
@@ -96,9 +107,8 @@ class ClientThread(threading.Thread):
         while(True):
             readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.5)
             for r in readable:
-                data = r.recv(1024)
+                data = r.recv(8192)
                 if data == "Live users list".encode():
-                    print("command to send live users list recvd ")
                     data = []
                     data.append("Live users list")
                     logged_in_users_pub = {}
@@ -141,7 +151,6 @@ class ClientThread(threading.Thread):
                             message.append(self.username)
                             message.append(data[user])
                             if self.username not in blocked[user]:
-                                print("message",message)
                                 message_queues[user].put(message)                       
                             else:
                                 message = []
@@ -162,7 +171,6 @@ class ClientThread(threading.Thread):
                 while temp:
                     try:
                         next_msg = message_queues[self.username].get_nowait()
-                        print(self.username,next_msg)
                         s.send(pickle.dumps(next_msg))
                         time.sleep(0.5)
                     except:
