@@ -49,13 +49,14 @@ class Login:
         self.frame.pack()
 
     def sign_up(self, event=None):
-        self.frame.destroy()                       
+        self.frame.destroy()
         objectdict["signup"] = SignUp(self.master)
 
     def new_window(self, event=None):
         username = self.entry1.get()
         password = self.entry2.get()
-        global s        
+        title_user = username
+        global s
         global selfpublickey
         s = socket.socket()
         s.connect((host, port))
@@ -81,7 +82,8 @@ class Login:
             s.close()
         else:
             data = pickle.loads(data)
-            self.frame.destroy()                       
+            self.frame.destroy()
+            self.master.title(title_user)
             objectdict["whoelse"] = OnlinePeople(self.master, data[1])
             myThread1()
 
@@ -245,15 +247,21 @@ class Chatbox:
         self.master = master
         self.otherusers = otherusers
         self.frame = tk.Frame(self.master)
-        self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")          
+        self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")
+        self.chatLog.configure(font=("Times New Roman", 12, "bold"))
+        if(len(self.otherusers)>1):
+            self.chatLog.insert(tk.END, "Broadcast message to users in list\n")
+        else:
+            self.chatLog.insert(tk.END, "Chat with " + str(list(self.otherusers.keys())[0]) + "\n")
         scrollbar = tk.Scrollbar(self.frame, command=self.chatLog.yview, cursor="heart")
         self.chatLog['yscrollcommand'] = scrollbar.set
+        self.chatLog.config(state=tk.DISABLED) 
         self.chatLog.grid(row=0, columnspan = 2)
         self.entry1 = tk.Entry(self.frame)
         self.entry1.grid(row=1, columnspan = 2, sticky="news")
         SendButton = tk.Button(self.frame, text="Send",
                             bd=0, bg="#FFBF00", activebackground="#FACC2E",
-                            command=self.send_chat)        
+                            command=self.send_chat)
         SendButton.grid(row=2, column=0, sticky="news")
         self.quit = tk.Button(self.frame, text = 'Quit', command = self.quit_chat)
         self.quit.grid(row=2, column=1, sticky="news")
@@ -264,19 +272,23 @@ class Chatbox:
         senddata = self.entry1.get()
         for user in self.otherusers:
             data[user] = RSA.importKey(self.otherusers[user]).encrypt(senddata.encode('utf-8'), 16)
+        self.chatLog.config(state=tk.NORMAL) 
         self.chatLog.insert(tk.END, "You: " + senddata+"\n")
+        self.chatLog.config(state=tk.DISABLED) 
         data = pickle.dumps(data)
         s.send(data)
     
 
     def append_chat(self, data, user):
+        self.chatLog.config(state=tk.NORMAL) 
         self.chatLog.insert(tk.END, user + ": " + data.decode()+"\n")
+        self.chatLog.config(state=tk.DISABLED) 
 
     def quit_chat(self):
-        if len(self.otherusers) > 1:
+        if len(self.otherusers) > 1: #broadcast
             del objectdict["Broadcast"]
         else:
-            del objectdict[list(self.otherusers.keys())[0]]
+            del objectdict[self.otherusers[0]]
         self.master.destroy()
 
 
@@ -303,7 +315,7 @@ class myThread(threading.Thread):
             self.root.destroy()
 
     def run(self):
-        self.root = tk.Tk()        
+        self.root = tk.Tk()    
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         Login(self.root)
         self.root.mainloop()
