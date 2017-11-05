@@ -9,7 +9,6 @@ from Crypto.PublicKey import RSA
 import json
 
 logged_in_users = {}
-logged_in_users_pub = {}
 users_pub = {}
 message_queues = {}
 recently_connected = {}
@@ -81,7 +80,7 @@ class ClientThread(threading.Thread):
             else:
                 self.username = username
                 logged_in_users[self.username] = [self.clientsocket,[]]
-                logged_in_users_pub[self.username] = clientpublickey
+                users_pub[self.username] = clientpublickey
                 recently_connected[self.username] = time.time()
                 if not message_queues[self.username].empty():
                     if logged_in_users[self.username][0] not in logged_in_users[self.username][-1]:
@@ -91,8 +90,8 @@ class ClientThread(threading.Thread):
             self.clientsocket.close()
             exit()
         data = []
-        data.append("Live users list")
-        data.append(logged_in_users_pub)
+        data.append("All users list")
+        data.append(users_pub)
         self.clientsocket.send(pickle.dumps(data))
         while(True):
             readable, writable, exceptional = select.select([self.clientsocket],logged_in_users[self.username][-1],[self.clientsocket],0.5)
@@ -101,6 +100,9 @@ class ClientThread(threading.Thread):
                 if data == "Live users list".encode():
                     data = []
                     data.append("Live users list")
+                    logged_in_users_pub = {}
+                    for user in logged_in_users.keys():
+                        logged_in_users_pub[user] = users_pub[user]
                     data.append(logged_in_users_pub)
                     self.clientsocket.send(pickle.dumps(data))
                 elif data == "Live 1Hr users list".encode():
@@ -124,6 +126,8 @@ class ClientThread(threading.Thread):
                         blocked[self.username].remove(data.decode().split(' ')[1])
                 elif data == "logout".encode():
                     self.clientsocket.close()
+                    del logged_in_users[self.username]
+                    print("Sucessfully logging out for user {} from server".format(self.username))
                     exit()
                 else:
                     try:
@@ -147,7 +151,6 @@ class ClientThread(threading.Thread):
                     except:
                         self.clientsocket.close()
                         del logged_in_users[self.username]
-                        del logged_in_users_pub[self.username]
                         exit()
             for s in writable:
                 temp = 1

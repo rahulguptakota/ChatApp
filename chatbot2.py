@@ -5,7 +5,7 @@ from Crypto.PublicKey import RSA
 import sys
 
 s = ""
-host = '192.168.0.106'
+host = '192.168.0.107'
 port = 8000
 cnt = 0
 flag = 0
@@ -221,7 +221,6 @@ class OnlinePeople:
             self.Lb1.insert(i, key)
             i = i + 1
 
-
     def update_1hr_list(self, data):
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
@@ -323,8 +322,11 @@ class myThread(threading.Thread):
         global close
         global s
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            s.send("logout".encode())
-            s.close()
+            try:
+                s.send("logout".encode())
+                s.close()
+            except:
+                pass
             close = 1
             exit()
             self.root.destroy()
