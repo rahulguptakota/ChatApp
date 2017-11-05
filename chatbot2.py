@@ -5,8 +5,8 @@ from Crypto.PublicKey import RSA
 import sys
 
 s = ""
-host = '192.168.0.107'
-port = 8000
+host = '127.0.0.1'
+port = int(sys.argv[1])
 cnt = 0
 flag = 0
 close = 0
@@ -205,6 +205,7 @@ class OnlinePeople:
             objectdict[user] = Chatbox(self.newWindow[user], otherusers)
 
     def liveusers(self):
+        print("live users list is called : ")
         global s
         s.send("Live users list".encode())
  
@@ -216,6 +217,8 @@ class OnlinePeople:
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
+        print("before update_live_user_list data was: ", self.data)
+        print("updating live user list: ", data)
         self.data = data
         for key in data:
             self.Lb1.insert(i, key)
@@ -355,7 +358,8 @@ class myThread1(threading.Thread):
                     readable, writable, exceptional = select.select([s],[],[],0.1)
                     for r in readable:
                         data = pickle.loads(r.recv(1024))
-                        if data[0] == "Live users list":
+                        if data[0] == "Live users list": 
+                            print("command to update live users list recvd")
                             objectdict["whoelse"].update_live_user_list(data[1])
                         elif data[0] == "Live 1Hr users list":
                             objectdict["whoelse"].update_1hr_list(list(data[1].keys()))

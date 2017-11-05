@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import socket, pickle, threading
 import os.path
-import time
+import time, sys
 import select
 from queue import Queue
 import os
@@ -98,6 +98,7 @@ class ClientThread(threading.Thread):
             for r in readable:
                 data = r.recv(1024)
                 if data == "Live users list".encode():
+                    print("command to send live users list recvd ")
                     data = []
                     data.append("Live users list")
                     logged_in_users_pub = {}
@@ -165,7 +166,7 @@ class ClientThread(threading.Thread):
 
 s = socket.socket()
 host = '0.0.0.0'
-port = 8000
+port = int(sys.argv[1])
 s.bind((host, port))
 s.listen(5)
 # Sockets from which we expect to read
