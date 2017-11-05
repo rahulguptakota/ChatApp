@@ -142,10 +142,10 @@ class OnlinePeople:
     def __init__(self, master,data={}):
         self.master = master
         self.newWindow = {}
-        self.data = data
-        self.allusers1 = []
-        global publickeys
-        publickeys = data
+        self.data = data #whatever data is used to display list on gui
+        #publickeys dict should always be updated with data of all users
+        #this implies i should always take public key from publickeys
+        #this necessitates that i update publickeys everytime
         self.frame = tk.Frame(self.master)
         self.Lb1 = tk.Listbox(self.frame)
         i=0
@@ -178,13 +178,13 @@ class OnlinePeople:
 
     def block_someone(self):
         global s
-        users = list(self.allusers1.keys())
+        users = list(self.data.keys())
         user = users[self.Lb1.curselection()[0]]
         s.send(("Block " + user).encode())
 
     def unblock_someone(self):
         global s
-        users = list(self.allusers1.keys())
+        users = list(self.data.keys())
         user = users[self.Lb1.curselection()[0]]
         s.send(("Unblock " + user).encode())
 
@@ -194,15 +194,14 @@ class OnlinePeople:
 
     def messageall(self):
         global s
-        otherusers = list(self.data.keys())
         user="Broadcast"
         if(user in self.newWindow):
             if(not self.newWindow[user].winfo_exists()):
                 self.newWindow[user] = tk.Toplevel(self.master)
-                objectdict[user] = Chatbox(self.newWindow[user], otherusers)
+                objectdict[user] = Chatbox(self.newWindow[user], self.data)
         else:
             self.newWindow[user] = tk.Toplevel(self.master)
-            objectdict[user] = Chatbox(self.newWindow[user], otherusers)
+            objectdict[user] = Chatbox(self.newWindow[user], self.data)
 
     def liveusers(self):
         print("live users list is called : ")
@@ -213,44 +212,25 @@ class OnlinePeople:
         global s
         s.send("All users list".encode())
 
-    def update_live_user_list(self, data):
+    def update_list(self, data):
         cs=self.Lb1.curselection()
         self.Lb1.delete(0,tk.END)
         i=0
         self.data = data
-        for key in data:
-            self.Lb1.insert(i, key)
-            i = i + 1
-
-    def update_1hr_list(self, data):
-        cs=self.Lb1.curselection()
-        self.Lb1.delete(0,tk.END)
-        i=0
-        for key in data:
-            self.Lb1.insert(i, key)
-            i = i + 1
-
-    def update_all_user_list(self, data):
-        cs=self.Lb1.curselection()
-        self.Lb1.delete(0,tk.END)
-        i=0
-        self.allusers1 = data
-        global publickeys
-        publickeys = data
-        for key in data:
+        for key in data.keys():
             self.Lb1.insert(i, key)
             i = i + 1
 
     def start_asyncchat(self):
-        users = list(self.allusers1.keys())
+        users = list(self.data.keys())
         user = users[self.Lb1.curselection()[0]]
         if(user in self.newWindow):
             if(not self.newWindow[user].winfo_exists()):
                 self.newWindow[user] = tk.Toplevel(self.master)
-                objectdict[user] = Chatbox(self.newWindow[user], [user])
+                objectdict[user] = Chatbox(self.newWindow[user], {user:self.data[user]})
         else:
             self.newWindow[user] = tk.Toplevel(self.master)
-            objectdict[user] = Chatbox(self.newWindow[user], [user])
+            objectdict[user] = Chatbox(self.newWindow[user], {user:self.data[user]})
 
     def start_chat(self):
         users = list(self.data.keys())
@@ -259,10 +239,10 @@ class OnlinePeople:
         if(user in self.newWindow):
             if(not self.newWindow[user].winfo_exists()):
                 self.newWindow[user] = tk.Toplevel(self.master)
-                objectdict[user] = Chatbox(self.newWindow[user], [user])
+                objectdict[user] = Chatbox(self.newWindow[user],{user:self.data[user]})
         else:
             self.newWindow[user] = tk.Toplevel(self.master)
-            objectdict[user] = Chatbox(self.newWindow[user], [user])
+            objectdict[user] = Chatbox(self.newWindow[user],{user:self.data[user]})
 
     def Logout(self):
         global s
@@ -272,9 +252,9 @@ class OnlinePeople:
         Login(self.master)
 
 class Chatbox:
-    def __init__(self, master, otheruser):
+    def __init__(self, master, otherusers):
         self.master = master
-        self.otheruser = otheruser
+        self.otherusers = otherusers
         self.frame = tk.Frame(self.master)
         self.chatLog = tk.Text(self.frame, bd=0, bg="white", height="8", width="50")          
         scrollbar = tk.Scrollbar(self.frame, command=self.chatLog.yview, cursor="heart")
@@ -292,10 +272,9 @@ class Chatbox:
 
     def send_chat(self):
         data = {}
-        global publickeys
         senddata = self.entry1.get()
-        for users in self.otheruser:
-            data[users] = RSA.importKey(publickeys[users]).encrypt(senddata.encode('utf-8'), 16)
+        for user in self.otherusers:
+            data[user] = RSA.importKey(self.otherusers[user]).encrypt(senddata.encode('utf-8'), 16)
         self.chatLog.insert(tk.END, "You: " + senddata+"\n")
         data = pickle.dumps(data)
         s.send(data)
@@ -305,7 +284,7 @@ class Chatbox:
         self.chatLog.insert(tk.END, user + ": " + data.decode()+"\n")
 
     def quit_chat(self):
-        for users in self.otheruser:
+        for users in self.otherusers:
             del objectdict[users]
         self.master.destroy()
 
@@ -358,11 +337,11 @@ class myThread1(threading.Thread):
                         data = pickle.loads(r.recv(1024))
                         if data[0] == "Live users list": 
                             print("command to update live users list recvd")
-                            objectdict["whoelse"].update_live_user_list(data[1])
+                            objectdict["whoelse"].update_list(data[1])
                         elif data[0] == "Live 1Hr users list":
-                            objectdict["whoelse"].update_1hr_list(list(data[1].keys()))
+                            objectdict["whoelse"].update_list(data[1])
                         elif data[0] == "All users list":
-                            objectdict["whoelse"].update_all_user_list(data[1])
+                            objectdict["whoelse"].update_list(data[1])
                         elif data[0] == "Blocked":
                             messagebox.showinfo("BLocked","You are blocked buddy")
                         else:

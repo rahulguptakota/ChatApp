@@ -112,7 +112,10 @@ class ClientThread(threading.Thread):
                             del recently_connected[item]
                     data = []
                     data.append("Live 1Hr users list")
-                    data.append(recently_connected)
+                    temp = {}
+                    for user in recently_connected:
+                        temp[user] = users_pub[user]
+                    data.append(temp)
                     self.clientsocket.send(pickle.dumps(data))
                 elif data == "All users list".encode():
                     data = []
