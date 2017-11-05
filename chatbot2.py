@@ -169,8 +169,6 @@ class OnlinePeople:
         self.block.pack()
         self.unblock = tk.Button(self.frame, text = 'Unblock', width = 25, command = self.unblock_someone)
         self.unblock.pack()
-        self.asyncchat = tk.Button(self.frame, text = 'Asyncchat', width = 25, command = self.start_asyncchat)
-        self.asyncchat.pack()
         self.frame.pack()
         global flag 
         flag = 1
@@ -222,17 +220,6 @@ class OnlinePeople:
         for key in data.keys():
             self.Lb1.insert(i, key)
             i = i + 1
-
-    def start_asyncchat(self):
-        users = list(self.data.keys())
-        user = users[self.Lb1.curselection()[0]]
-        if(user in self.newWindow):
-            if(not self.newWindow[user].winfo_exists()):
-                self.newWindow[user] = tk.Toplevel(self.master)
-                objectdict[user] = Chatbox(self.newWindow[user], {user:self.data[user]})
-        else:
-            self.newWindow[user] = tk.Toplevel(self.master)
-            objectdict[user] = Chatbox(self.newWindow[user], {user:self.data[user]})
 
     def start_chat(self):
         users = list(self.data.keys())
@@ -286,8 +273,10 @@ class Chatbox:
         self.chatLog.insert(tk.END, user + ": " + data.decode()+"\n")
 
     def quit_chat(self):
-        for users in self.otherusers:
-            del objectdict[users]
+        if len(self.otherusers) > 1:
+            del objectdict["Broadcast"]
+        else:
+            del objectdict[list(self.otherusers.keys())[0]]
         self.master.destroy()
 
 

@@ -141,7 +141,8 @@ class ClientThread(threading.Thread):
                             message.append(self.username)
                             message.append(data[user])
                             if self.username not in blocked[user]:
-                                message_queues[user].put(message)                        
+                                print("message",message)
+                                message_queues[user].put(message)                       
                             else:
                                 message = []
                                 message.append("Blocked")
@@ -161,7 +162,9 @@ class ClientThread(threading.Thread):
                 while temp:
                     try:
                         next_msg = message_queues[self.username].get_nowait()
+                        print(self.username,next_msg)
                         s.send(pickle.dumps(next_msg))
+                        time.sleep(0.5)
                     except:
                         if s in logged_in_users[self.username][-1]:
                             logged_in_users[self.username][-1].remove(s)
