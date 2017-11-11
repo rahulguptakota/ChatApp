@@ -88,7 +88,6 @@ class ClientThread(threading.Thread):
                     self.username = username
                     logged_in_users[self.username] = [self.clientsocket,[]]
                     users_pub[self.username] = clientpublickey
-                    recently_connected[self.username] = time.time()
                     if not message_queues[self.username].empty():
                         if logged_in_users[self.username][0] not in logged_in_users[self.username][-1]:
                             logged_in_users[self.username][-1].append(logged_in_users[self.username][0])
@@ -125,6 +124,8 @@ class ClientThread(threading.Thread):
                     temp = {}
                     for user in recently_connected:
                         temp[user] = users_pub[user]
+                    for user in logged_in_users.keys():
+                        temp[user] = users_pub[user]
                     data.append(temp)
                     self.clientsocket.send(pickle.dumps(data))
                 elif data == "All users list".encode():
@@ -139,6 +140,7 @@ class ClientThread(threading.Thread):
                     if(data.decode().split(' ')[1] in blocked[self.username]):
                         blocked[self.username].remove(data.decode().split(' ')[1])
                 elif data == "logout".encode():
+                    recently_connected[self.username] = time.time()
                     self.clientsocket.close()
                     del logged_in_users[self.username]
                     print("Sucessfully logging out for user {} from server".format(self.username))
@@ -163,6 +165,7 @@ class ClientThread(threading.Thread):
                             elif logged_in_users[user][0] not in logged_in_users[user][-1]:
                                 logged_in_users[user][-1].append(logged_in_users[user][0])
                     except:
+                        recently_connected[self.username] = time.time()
                         self.clientsocket.close()
                         del logged_in_users[self.username]
                         exit()
