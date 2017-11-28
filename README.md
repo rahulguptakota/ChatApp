@@ -1,6 +1,6 @@
-# Chat Room
+# Chat App
 
-Chat Room is a comprehensive client-server messaging application
+Chat App is a comprehensive client-server messaging application
 
 ## Getting Started
 
